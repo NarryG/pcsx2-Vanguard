@@ -565,6 +565,7 @@
     <ClInclude Include="..\..\DebugTools\DisASM.h" />
     <ClInclude Include="..\..\DebugTools\DisVUmicro.h" />
     <ClInclude Include="..\..\DebugTools\DisVUops.h" />
+    <ClInclude Include="SavestateWrapper.h" />
     <CustomBuildStep Include="..\..\rdebug\deci2.h">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </CustomBuildStep>

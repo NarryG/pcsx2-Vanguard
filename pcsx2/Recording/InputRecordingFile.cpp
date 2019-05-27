@@ -22,6 +22,7 @@
 #include "MemoryTypes.h"
 
 #include "InputRecordingFile.h"
+#include "SavestateWrapper.h"
 
 long InputRecordingFile::GetBlockSeekPoint(const long & frame)
 {

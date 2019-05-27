@@ -1377,6 +1377,9 @@
     <ClInclude Include="..\..\Vanguard\PCSX2MemoryDomain.h">
       <Filter>Vanguard</Filter>
     </ClInclude>
+    <ClInclude Include="SavestateWrapper.h">
+      <Filter>Vanguard</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\wxResources.rc">

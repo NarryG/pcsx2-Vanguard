@@ -3,14 +3,14 @@
 #pragma warning(disable : 4564)
 #include <string>
 
-#include <wx/dir.h>
-#include <wx/file.h>
 #include "Helpers.hpp"
 #include "VanguardClient.h"
 #include "VanguardClientInitializer.h"
 #include "PCSX2MemoryDomain.h"
 
 #include <msclr/marshal_cppstd.h>
+#include "SavestateWrapper.h"
+#include "wx/string.h"
 
 typedef char s8;
 typedef int16_t s16;
@@ -204,8 +204,8 @@ static Reflection::Assembly ^ CurrentDomain_AssemblyResolve(Object ^ sender, Res
     // Start everything
     ManagedGlobals::client = gcnew VanguardClient;
 
-	//Todo
-    ManagedGlobals::client->configPaths = gcnew array<String ^>{ };
+    //Todo
+    ManagedGlobals::client->configPaths = gcnew array<String ^>{};
 
     ManagedGlobals::client->StartClient();
     ManagedGlobals::client->RegisterVanguardSpec();
@@ -340,7 +340,7 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
         gameDone->Set(VSPEC::GAMENAME, CorruptCore_Extensions::MakeSafeFilename(gameName, replaceChar));
 
 
-		//Todo
+        //Todo
         //String^ syncsettings = ManagedGlobals::client->GetConfigAsJson(VanguardSettings::GetVanguardSettingsFromDolphin());
         //gameDone->Set(VSPEC::SYNCSETTINGS, syncsettings);
 
@@ -445,6 +445,8 @@ bool VanguardClient::LoadRom(String ^ filename)
 bool VanguardClient::LoadState(std::string filename)
 {
     StepActions::ClearStepBlastUnits();
+    wxString mystring(filename);
+    StateCopy_LoadFromFile(mystring);
     // State::LoadAs(filename);
     return true;
 }
@@ -452,6 +454,11 @@ bool VanguardClient::LoadState(std::string filename)
 bool VanguardClient::SaveState(String ^ filename, bool wait)
 {
     std::string converted_filename = Helpers::systemStringToUtf8String(filename);
+
+    wxString mystring(converted_filename);
+    StateCopy_SaveToFile(mystring);
+	return true;
+
     // if (Core::IsRunningAndStarted())
     //  {
     //   State::SaveAs(converted_filename, wait);
@@ -462,12 +469,12 @@ bool VanguardClient::SaveState(String ^ filename, bool wait)
 
 // No fun anonymous classes with closure here
 #pragma region Delegates
-void StopGame()//Todo
+void StopGame() //Todo
 {
     // Core::Stop();
 }
 
-void Quit()//Todo
+void Quit() //Todo
 {
     // VanguardClientInitializer::win->close();
 }
@@ -475,7 +482,7 @@ void Quit()//Todo
 void AllSpecsSent()
 {
     AllSpec::VanguardSpec->Update(VSPEC::EMUDIR, ManagedGlobals::client->emuDir, true, true);
-    //VanguardClientInitializer::win->Show();  
+    //VanguardClientInitializer::win->Show();
 }
 #pragma endregion
 
