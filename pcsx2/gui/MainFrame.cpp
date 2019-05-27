@@ -29,6 +29,7 @@
 
 #include "svnrev.h"
 #include "Saveslots.h"
+#include "Vanguard/VanguardClientInitializer.h"
 
 // ------------------------------------------------------------------------
 wxMenu* MainEmuFrame::MakeStatesSubMenu( int baseid, int loadBackupId ) const
@@ -588,6 +589,8 @@ MainEmuFrame::MainEmuFrame(wxWindow* parent, const wxString& title)
 	ApplyCoreStatus();
 	ApplySettings();
 	AppendKeycodeNamesToMenuOptions();
+
+	VanguardClientInitializer::Initialize();
 }
 
 MainEmuFrame::~MainEmuFrame()

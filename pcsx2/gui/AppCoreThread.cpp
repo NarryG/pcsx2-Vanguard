@@ -32,6 +32,7 @@
 #include "Patch.h"
 #include "R5900Exceptions.h"
 #include "Sio.h"
+#include "Vanguard/VanguardClientInitializer.h"
 
 __aligned16 SysMtgsThread mtgsThread;
 __aligned16 AppCoreThread CoreThread;
@@ -401,6 +402,10 @@ static void _ApplySettings( const Pcsx2Config& src, Pcsx2Config& fixup )
 			{
 				int compat = game.getInt("Compat");
 				gameName   = game.getString("Name");
+                
+				//Vanguard - Add gamename
+				VANGUARD_GameName = gameName.ToStdString();
+
 				gameName  += L" (" + game.getString("Region") + L")";
 				gameCompat = L" [Status = "+compatToStringWX(compat)+L"]";
 				gameMemCardFilter = game.getString("MemCardFilter");

@@ -41,7 +41,8 @@
     <UseDebugLibraries Condition="!$(Configuration.Contains(Debug))">false</UseDebugLibraries>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <CLRSupport>true</CLRSupport>
+    <CLRSupport>
+    </CLRSupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
@@ -209,6 +210,20 @@
     <ClCompile Include="..\..\Recording\VirtualPad.cpp" />
     <ClCompile Include="..\..\Utilities\FileUtils.cpp" />
     <ClCompile Include="..\..\Dump.cpp" />
+    <ClCompile Include="..\..\Vanguard\PCSX2MemoryDomain.cpp">
+      <FileType>CppCode</FileType>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</CompileAsManaged>
+      <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</RuntimeTypeInfo>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="..\..\Vanguard\VanguardClient.cpp">
+      <FileType>CppCode</FileType>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</CompileAsManaged>
+      <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</RuntimeTypeInfo>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\x86\iMisc.cpp" />
     <ClCompile Include="..\..\Pcsx2Config.cpp" />
     <ClCompile Include="..\..\PluginManager.cpp" />
@@ -480,6 +495,12 @@
     <ClInclude Include="..\..\Hw.h" />
     <ClInclude Include="..\..\Cache.h" />
     <ClInclude Include="..\..\Memory.h" />
+    <ClInclude Include="..\..\Vanguard\PCSX2MemoryDomain.h" />
+    <ClInclude Include="..\..\Vanguard\Helpers.hpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\Vanguard\VanguardClient.h" />
+    <ClInclude Include="..\..\Vanguard\VanguardClientInitializer.h" />
     <ClInclude Include="..\..\vtlb.h" />
     <ClInclude Include="..\..\MTVU.h" />
     <ClInclude Include="..\..\VU.h" />
@@ -607,6 +628,15 @@
     <ResourceCompile Include="..\wxResources.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\RTCV\Source\Libraries\CorruptCore\CorruptCore.csproj">
+      <Project>{b5633a86-dc66-4723-88eb-7dfc95458072}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\RTCV\Source\Libraries\NetCore\NetCore.csproj">
+      <Project>{7e106aec-5614-4206-9e4d-25759c90e8ae}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\RTCV\Source\Libraries\Vanguard\Vanguard.csproj">
+      <Project>{364c705e-b7ab-4a94-a59b-88899ce65958}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\3rdparty\pthreads4w\build\pthreads4w.vcxproj">
       <Project>{0fae817d-9a32-4830-857e-81da57246e16}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
