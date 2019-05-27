@@ -296,12 +296,14 @@ static int loadGameSettings(Pcsx2Config& dest, const Game_Data& game) {
 	return gf;
 }
 
+//Vanguard - MOVE TO HEADER 
+
 // Used to track the current game serial/id, and used to disable verbose logging of
 // applied patches if the game info hasn't changed.  (avoids spam when suspending/resuming
 // or using TAB or other things), but gets verbose again when booting (even if the same game).
 // File scope since it gets reset externally when rebooting
-#define _UNKNOWN_GAME_KEY (L"_UNKNOWN_GAME_KEY")
-static wxString curGameKey = _UNKNOWN_GAME_KEY;
+//#define _UNKNOWN_GAME_KEY (L"_UNKNOWN_GAME_KEY")
+//static wxString curGameKey = _UNKNOWN_GAME_KEY;
 
 void PatchesVerboseReset()
 {
@@ -403,9 +405,6 @@ static void _ApplySettings( const Pcsx2Config& src, Pcsx2Config& fixup )
 				int compat = game.getInt("Compat");
 				gameName   = game.getString("Name");
                 
-				//Vanguard - Add gamename
-				VANGUARD_GameName = gameName.ToStdString();
-
 				gameName  += L" (" + game.getString("Region") + L")";
 				gameCompat = L" [Status = "+compatToStringWX(compat)+L"]";
 				gameMemCardFilter = game.getString("MemCardFilter");

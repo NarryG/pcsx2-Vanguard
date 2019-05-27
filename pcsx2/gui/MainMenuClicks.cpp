@@ -30,7 +30,6 @@
 #include "Debugger/DisassemblyDialog.h"
 
 #include "Utilities/IniInterface.h"
-#include "SavestateWrapper.h"
 
 #ifndef DISABLE_RECORDING
 #	include "Recording/InputRecording.h"

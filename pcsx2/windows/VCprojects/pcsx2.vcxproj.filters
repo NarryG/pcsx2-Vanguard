@@ -901,6 +901,9 @@
     <ClCompile Include="..\..\Vanguard\PCSX2MemoryDomain.cpp">
       <Filter>Vanguard</Filter>
     </ClCompile>
+    <ClCompile Include="UnmanagedWrapper.cpp">
+      <Filter>Vanguard</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Patch.h">
@@ -1377,7 +1380,7 @@
     <ClInclude Include="..\..\Vanguard\PCSX2MemoryDomain.h">
       <Filter>Vanguard</Filter>
     </ClInclude>
-    <ClInclude Include="SavestateWrapper.h">
+    <ClInclude Include="UnmanagedWrapper.h">
       <Filter>Vanguard</Filter>
     </ClInclude>
   </ItemGroup>

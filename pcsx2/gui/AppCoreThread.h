@@ -39,6 +39,10 @@ enum ScopedCoreResumeType
 };
 
 
+//Vanguard - MOVE TO HEADER
+#define _UNKNOWN_GAME_KEY (L"_UNKNOWN_GAME_KEY")
+static wxString curGameKey = _UNKNOWN_GAME_KEY;
+
 // --------------------------------------------------------------------------------------
 //  BaseSysExecEvent_ScopedCore
 // --------------------------------------------------------------------------------------

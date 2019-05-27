@@ -7,5 +7,3 @@ public:
 private:
     static void StartVanguardClient();
 };
-
-static std::string VANGUARD_GameName = "";

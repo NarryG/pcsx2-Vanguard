@@ -9,7 +9,7 @@
 #include "PCSX2MemoryDomain.h"
 
 #include <msclr/marshal_cppstd.h>
-#include "SavestateWrapper.h"
+#include "UnmanagedWrapper.h"
 #include "wx/string.h"
 
 typedef char s8;
@@ -191,8 +191,8 @@ static Reflection::Assembly ^ CurrentDomain_AssemblyResolve(Object ^ sender, Res
     }
 }
 
-    // Create our VanguardClient
-    void VanguardClientInitializer::StartVanguardClient()
+// Create our VanguardClient
+void VanguardClientInitializer::StartVanguardClient()
 {
     System::Windows::Forms::Form ^ dummy = gcnew System::Windows::Forms::Form();
     IntPtr Handle = dummy->Handle;
@@ -334,7 +334,7 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
 
         String ^ oldGame = AllSpec::VanguardSpec->Get<String ^>(VSPEC::GAMENAME);
 
-        String ^ gameName = Helpers::utf8StringToSystemString(VANGUARD_GameName);
+        String ^ gameName = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_GameName);
 
         char replaceChar = L'-';
         gameDone->Set(VSPEC::GAMENAME, CorruptCore_Extensions::MakeSafeFilename(gameName, replaceChar));
@@ -446,7 +446,7 @@ bool VanguardClient::LoadState(std::string filename)
 {
     StepActions::ClearStepBlastUnits();
     wxString mystring(filename);
-    StateCopy_LoadFromFile(mystring);
+    UnmanagedWrapper::VANGUARD_LOADSTATE(mystring);
     // State::LoadAs(filename);
     return true;
 }
@@ -456,7 +456,7 @@ bool VanguardClient::SaveState(String ^ filename, bool wait)
     std::string converted_filename = Helpers::systemStringToUtf8String(filename);
 
     wxString mystring(converted_filename);
-    StateCopy_SaveToFile(mystring);
+    UnmanagedWrapper::VANGUARD_SAVESTATE(mystring);
 	return true;
 
     // if (Core::IsRunningAndStarted())
@@ -474,9 +474,9 @@ void StopGame() //Todo
     // Core::Stop();
 }
 
-void Quit() //Todo
+void Quit() 
 {
-    // VanguardClientInitializer::win->close();
+    UnmanagedWrapper::VANGUARD_EXIT();
 }
 
 void AllSpecsSent()
@@ -533,7 +533,7 @@ void VanguardClient::OnMessageReceived(Object ^ sender, NetCoreEventArgs ^ e)
 
             // Get the prefix for the state
 
-            String ^ gameName = Helpers::utf8StringToSystemString(VANGUARD_GameName);
+            String ^ gameName = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_GameName);
 
             char replaceChar = L'-';
             String ^ prefix = CorruptCore_Extensions::MakeSafeFilename(gameName, replaceChar);

@@ -56,6 +56,7 @@ protected:
 	void CleanupEvent();
 };
 
-//Vanguard - move to wrapper
+extern void StateCopy_SaveToFile(const wxString &file);
+extern void StateCopy_LoadFromFile(const wxString &file);
 extern void StateCopy_SaveToSlot(uint num);
 extern void StateCopy_LoadFromSlot(uint slot, bool isFromBackup = false);
