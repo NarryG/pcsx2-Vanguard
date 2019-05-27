@@ -28,6 +28,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1CEFD830-2B76-4596-A4EE-BCD7280A60BD}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <TargetFrameworkVersion>4.7.1</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
@@ -37,6 +39,9 @@
     <WholeProgramOptimization Condition="$(Configuration.Contains(Release))">true</WholeProgramOptimization>
     <UseDebugLibraries Condition="$(Configuration.Contains(Debug))">true</UseDebugLibraries>
     <UseDebugLibraries Condition="!$(Configuration.Contains(Debug))">false</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <CLRSupport>true</CLRSupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
@@ -65,6 +70,7 @@
     </ClCompile>
     <Link>
       <LargeAddressAware>Yes</LargeAddressAware>
+      <CLRThreadAttribute Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">STAThreadingAttribute</CLRThreadAttribute>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
