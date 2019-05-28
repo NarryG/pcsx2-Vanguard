@@ -68,7 +68,7 @@ public:
 
     bool LoadRom(String ^ filename);
     bool LoadState(std::string filename);
-    bool SaveState(String ^ filename, bool wait);
+    bool SaveState(String ^ filename);
 
     //String ^ GetConfigAsJson(VanguardSettingsWrapper ^ settings);
     //VanguardSettingsWrapper ^ GetConfigFromJson(String ^ json);
@@ -90,11 +90,8 @@ public:
 
 static void EmuThreadExecute(Action ^ callback)
 {
-    //IntPtr callbackPtr = Marshal::GetFunctionPointerForDelegate(callback);
-    //std::function<void(void)> nativeCallback =
-    //  static_cast<void(__stdcall *)(void)>(callbackPtr.ToPointer());
-
-    //Core::RunAsCPUThread(nativeCallback);
+    IntPtr callbackPtr = Marshal::GetFunctionPointerForDelegate(callback);
+    UnmanagedWrapper::VANGUARD_INVOKEEMUTHREAD(FnPtr_VanguardMethod(callbackPtr.ToPointer()));
 }
 
 static PartialSpec ^ getDefaultPartial() {
@@ -120,7 +117,7 @@ static PartialSpec ^ getDefaultPartial() {
     return partial;
 }
 
-    void VanguardClient::SpecUpdated(Object ^ sender, SpecUpdateEventArgs ^ e)
+void VanguardClient::SpecUpdated(Object ^ sender, SpecUpdateEventArgs ^ e)
 {
     PartialSpec ^ partial = e->partialSpec;
 
@@ -261,7 +258,7 @@ static array<MemoryDomainProxy ^> ^ GetInterfaces() {
     return interfaces;
 }
 
-    static bool RefreshDomains()
+static bool RefreshDomains()
 {
     auto interfaces = GetInterfaces();
     AllSpec::VanguardSpec->Update(VSPEC::MEMORYDOMAINS_INTERFACES, interfaces, true, true);
@@ -334,7 +331,7 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
 
         String ^ oldGame = AllSpec::VanguardSpec->Get<String ^>(VSPEC::GAMENAME);
 
-        String ^ gameName = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_GameName);
+        String ^ gameName = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_GETGAMENAME());
 
         char replaceChar = L'-';
         gameDone->Set(VSPEC::GAMENAME, CorruptCore_Extensions::MakeSafeFilename(gameName, replaceChar));
@@ -447,24 +444,16 @@ bool VanguardClient::LoadState(std::string filename)
     StepActions::ClearStepBlastUnits();
     wxString mystring(filename);
     UnmanagedWrapper::VANGUARD_LOADSTATE(mystring);
-    // State::LoadAs(filename);
     return true;
 }
 //Todo
-bool VanguardClient::SaveState(String ^ filename, bool wait)
+bool VanguardClient::SaveState(String ^ filename)
 {
     std::string converted_filename = Helpers::systemStringToUtf8String(filename);
 
     wxString mystring(converted_filename);
     UnmanagedWrapper::VANGUARD_SAVESTATE(mystring);
 	return true;
-
-    // if (Core::IsRunningAndStarted())
-    //  {
-    //   State::SaveAs(converted_filename, wait);
-    //    return true;
-    //  }
-    return false;
 }
 
 // No fun anonymous classes with closure here
@@ -533,7 +522,7 @@ void VanguardClient::OnMessageReceived(Object ^ sender, NetCoreEventArgs ^ e)
 
             // Get the prefix for the state
 
-            String ^ gameName = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_GameName);
+            String ^ gameName = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_GETGAMENAME());
 
             char replaceChar = L'-';
             String ^ prefix = CorruptCore_Extensions::MakeSafeFilename(gameName, replaceChar);
@@ -549,8 +538,8 @@ void VanguardClient::OnMessageReceived(Object ^ sender, NetCoreEventArgs ^ e)
             if (file->Directory != nullptr && file->Directory->Exists == false)
                 file->Directory->Create();
 
-            // if (ManagedGlobals::client->SaveState(path, false) && Core::IsRunningAndStarted())
-            e->setReturnValue(path);
+            if(ManagedGlobals::client->SaveState(path))
+                e->setReturnValue(path);
         } break;
 
         case REMOTE_LOADROM: {

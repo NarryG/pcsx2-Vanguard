@@ -27,6 +27,7 @@
 
 #include <cstring>
 #include <array>
+#include "Vanguard/VanguardClient.h"
 
 static InputIsoFile iso;
 
@@ -37,7 +38,8 @@ static bool layer1searched = false;
 
 void CALLBACK ISOclose()
 {
-	iso.Close();
+    iso.Close();
+    VanguardClientUnmanaged::GAME_CLOSED();
 }
 
 s32 CALLBACK ISOopen(const char* pTitle)
@@ -54,6 +56,7 @@ s32 CALLBACK ISOopen(const char* pTitle)
 	// calls, so we need to catch them, log them, and return -1.
 
 	try {
+        VanguardClientUnmanaged::LOAD_GAME_START(fromUTF8(pTitle).ToStdString());
 		iso.Open(fromUTF8(pTitle));
 	}
 	catch( BaseException& ex )

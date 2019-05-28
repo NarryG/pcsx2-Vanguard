@@ -31,6 +31,8 @@
 #include "Utilities/PageFaultSource.h"
 #include "Utilities/Threading.h"
 
+#include "Vanguard/VanguardClient.h"
+
 #ifdef __WXMSW__
 #	include <wx/msw/wrapwin.h>
 #endif

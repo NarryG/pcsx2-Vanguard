@@ -4,11 +4,47 @@
 #include "AppSaveStates.h"
 #include "GameDatabase.h"
 
-
 //C++/CLI has various restrictions (no std::mutex for example), so we can't actually include certain headers directly
 //What we CAN do is wrap those functions
 
-std::string UnmanagedWrapper::VANGUARD_GameName = "";
+// --------------------------------------------------------------------------------------
+//  RunVanguardCodeEvent
+// --------------------------------------------------------------------------------------
+class RunVanguardCodeEvent : public SysExecEvent
+{
+protected:
+    FnPtr_VanguardMethod m_method;
+    bool m_IsCritical;
+
+public:
+    wxString GetEventName() const { return L"RunVanguardCodeEvent"; }
+    virtual ~RunVanguardCodeEvent() = default;
+    RunVanguardCodeEvent *Clone() const { return new RunVanguardCodeEvent(*this); }
+
+    bool AllowCancelOnExit() const { return false; }
+    bool IsCriticalEvent() const { return m_IsCritical; }
+
+    RunVanguardCodeEvent(FnPtr_VanguardMethod method, bool critical = false)
+    {
+        m_method = method;
+        m_IsCritical = critical;
+    }
+
+    RunVanguardCodeEvent &Critical()
+    {
+        m_IsCritical = true;
+        return *this;
+    }
+
+protected:
+    void InvokeEvent()
+    {
+        if (m_method)
+            (*m_method)();
+    }
+};
+
+
 
 void UnmanagedWrapper::VANGUARD_EXIT()
 {
@@ -36,5 +72,10 @@ std::string UnmanagedWrapper::VANGUARD_GETGAMENAME()
             }
           }
         }
-    return "";
+    return "UNKNOWNGAME";
+}
+
+void UnmanagedWrapper::VANGUARD_INVOKEEMUTHREAD(void(*f)())
+{
+    GetSysExecutorThread().Rpc_TryInvoke(f);
 }

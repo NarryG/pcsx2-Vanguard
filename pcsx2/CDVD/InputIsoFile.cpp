@@ -17,6 +17,7 @@
 #include "PrecompiledHeader.h"
 #include "IopCommon.h"
 #include "IsoFileFormats.h"
+#include "Vanguard/VanguardClient.h"
 
 #include <errno.h>
 
@@ -203,6 +204,7 @@ bool InputIsoFile::Test( const wxString& srcfile )
 bool InputIsoFile::Open( const wxString& srcfile, bool testOnly )
 {
 	Close();
+
 	m_filename = srcfile;
 	m_reader = NULL;
 
@@ -286,7 +288,6 @@ void InputIsoFile::Close()
 {
 	delete m_reader;
 	m_reader = NULL;
-	
 	_init();
 }
 
