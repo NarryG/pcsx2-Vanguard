@@ -410,6 +410,9 @@ static __ri void vtlb_Miss(u32 addr,u32 mode)
 		throw Exception::CancelInstruction();
 	}
 
+    //VANGUARD
+    return;
+
 	if( IsDevBuild )
 		Cpu->ThrowCpuException( R5900Exception::TLBMiss( addr, !!mode ) );
 	else
@@ -430,6 +433,8 @@ static __ri void vtlb_BusError(u32 addr,u32 mode)
 #ifdef __linux__
 	if (0)
 #else
+    //VANGUARD
+    return;
 	if( IsDevBuild )
 #endif
 		Cpu->ThrowCpuException( R5900Exception::BusError( addr, !!mode ) );

@@ -1,4 +1,5 @@
 #include "PCSX2MemoryDomain.h"
+#include "UnmanagedWrapper.h"
 
 using namespace cli;
 using namespace System;
@@ -8,17 +9,17 @@ using namespace Vanguard;
 using namespace Runtime::InteropServices;
 using namespace Diagnostics;
 
-#using <System.dll>
+#using < System.dll >
 #define EERAM_SIZE 33554432
 #define WORD_SIZE 4
 #define BIG_ENDIAN false
 
 
-delegate void MessageDelegate(Object^);
+delegate void MessageDelegate(Object ^);
 
 String ^ EERAM::Name::get()
 {
-  return "EERAM";
+    return "EERAM";
 }
 
 long long EERAM::Size::get()
@@ -28,35 +29,35 @@ long long EERAM::Size::get()
 
 int EERAM::WordSize::get()
 {
-  return WORD_SIZE;
+    return WORD_SIZE;
 }
 
 bool EERAM::BigEndian::get()
 {
-  return BIG_ENDIAN;
+    return BIG_ENDIAN;
 }
 
 unsigned char EERAM::PeekByte(long long addr)
 {
-    if (addr < EERAM_SIZE)
-    {
+    if (addr < EERAM_SIZE) {
+        return UnmanagedWrapper::EERAM_PEEKBYTE(addr);
     }
     return 0;
 }
 
 array<unsigned char> ^ EERAM::PeekBytes(long long address, int length)
 {
-  array<unsigned char> ^ bytes = gcnew array<unsigned char>(length);
-  for (int i = 0; i < length; i++)
-  {
-    bytes[i] = PeekByte(address + i);
-  }
-  return bytes;
+    array<unsigned char> ^ bytes = gcnew array<unsigned char>(length);
+    for (int i = 0; i < length; i++) {
+        bytes[i] = PeekByte(address + i);
+    }
+    return bytes;
 }
 
 void EERAM::PokeByte(long long addr, unsigned char val)
 {
-  if (addr < EERAM_SIZE)
-  {
-  }
+    if (addr < EERAM_SIZE) {
+
+        UnmanagedWrapper::EERAM_POKEBYTE(addr, val);
+    }
 }

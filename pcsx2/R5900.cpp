@@ -388,7 +388,6 @@ __fi void _cpuEventTest_Shared()
 
 	if( cpuTestCycle( nextsCounter, nextCounter ) )
 	{
-        VanguardClientUnmanaged::CORE_STEP();
 		rcntUpdate();
 		_cpuTestPERF();
 	}

@@ -48,7 +48,6 @@ using namespace Diagnostics;
 #define EXRAM_SIZE 67108864
 
 static int CPU_STEP_Count = 0;
-static void EmuThreadExecute(Action ^ callback);
 
 // Define this in here as it's managed and weird stuff happens if it's in a header
 public
@@ -88,11 +87,6 @@ public:
     static VanguardClient ^ client = nullptr;
 };
 
-static void EmuThreadExecute(Action ^ callback)
-{
-    IntPtr callbackPtr = Marshal::GetFunctionPointerForDelegate(callback);
-    UnmanagedWrapper::VANGUARD_INVOKEEMUTHREAD(FnPtr_VanguardMethod(callbackPtr.ToPointer()));
-}
 
 static PartialSpec ^ getDefaultPartial() {
     PartialSpec ^ partial = gcnew PartialSpec("VanguardSpec");
@@ -117,7 +111,7 @@ static PartialSpec ^ getDefaultPartial() {
     return partial;
 }
 
-void VanguardClient::SpecUpdated(Object ^ sender, SpecUpdateEventArgs ^ e)
+    void VanguardClient::SpecUpdated(Object ^ sender, SpecUpdateEventArgs ^ e)
 {
     PartialSpec ^ partial = e->partialSpec;
 
@@ -188,15 +182,13 @@ static Reflection::Assembly ^ CurrentDomain_AssemblyResolve(Object ^ sender, Res
     }
 }
 
-// Create our VanguardClient
-void VanguardClientInitializer::StartVanguardClient()
+    // Create our VanguardClient
+    void VanguardClientInitializer::StartVanguardClient()
 {
     System::Windows::Forms::Form ^ dummy = gcnew System::Windows::Forms::Form();
     IntPtr Handle = dummy->Handle;
     SyncObjectSingleton::SyncObject = dummy;
-
-    SyncObjectSingleton::EmuInvokeDelegate =
-        gcnew SyncObjectSingleton::ActionDelegate(&EmuThreadExecute);
+    SyncObjectSingleton::UseQueue = true;
 
     // Start everything
     ManagedGlobals::client = gcnew VanguardClient;
@@ -206,7 +198,7 @@ void VanguardClientInitializer::StartVanguardClient()
 
     ManagedGlobals::client->StartClient();
     ManagedGlobals::client->RegisterVanguardSpec();
-    RTCV::CorruptCore::CorruptCore::StartEmuSide();
+    RTCV::CorruptCore::RtcCore::StartEmuSide();
 }
 
 // Create our VanguardClient
@@ -225,13 +217,13 @@ void VanguardClient::StartClient()
     receiver->MessageReceived +=
         gcnew EventHandler<NetCoreEventArgs ^>(this, &VanguardClient::OnMessageReceived);
 
-    RTCV::NetCore::Extensions::ConsoleHelper::CreateConsole(ManagedGlobals::client->logPath);
-    RTCV::NetCore::Extensions::ConsoleHelper::HideConsole();
+    RTCV::NetCore::NetCore_Extensions::ConsoleHelper::CreateConsole(ManagedGlobals::client->logPath);
+    RTCV::NetCore::NetCore_Extensions::ConsoleHelper::HideConsole();
     // Can't use contains
     auto args = Environment::GetCommandLineArgs();
     for (int i = 0; i < args->Length; i++) {
         if (args[i] == "-CONSOLE") {
-            RTCV::NetCore::Extensions::ConsoleHelper::ShowConsole();
+            RTCV::NetCore::NetCore_Extensions::ConsoleHelper::ShowConsole();
         }
     }
     connector = gcnew VanguardConnector(receiver);
@@ -253,12 +245,12 @@ void VanguardClient::StopClient()
 #pragma region MemoryDomains
 static array<MemoryDomainProxy ^> ^ GetInterfaces() {
     array<MemoryDomainProxy ^> ^ interfaces = gcnew array<MemoryDomainProxy ^>(1);
-    interfaces[0] = (gcnew MemoryDomainProxy(gcnew EERAM));
+    interfaces[0] = gcnew MemoryDomainProxy(gcnew EERAM);
 
     return interfaces;
 }
 
-static bool RefreshDomains()
+    static bool RefreshDomains()
 {
     auto interfaces = GetInterfaces();
     AllSpec::VanguardSpec->Update(VSPEC::MEMORYDOMAINS_INTERFACES, interfaces, true, true);
@@ -287,13 +279,13 @@ static void STEP_CORRUPT() // errors trapped by CPU_STEP
 {
     StepActions::Execute();
     CPU_STEP_Count++;
-    bool autoCorrupt = RTCV::CorruptCore::CorruptCore::AutoCorrupt;
-    long errorDelay = RTCV::CorruptCore::CorruptCore::ErrorDelay;
+    bool autoCorrupt = RTCV::CorruptCore::RtcCore::AutoCorrupt;
+    long errorDelay = RTCV::CorruptCore::RtcCore::ErrorDelay;
     if (autoCorrupt && CPU_STEP_Count >= errorDelay) {
         CPU_STEP_Count = 0;
         array<String ^> ^ domains = AllSpec::UISpec->Get<array<String ^> ^>("SELECTEDDOMAINS");
 
-        BlastLayer ^ bl = RTCV::CorruptCore::CorruptCore::GenerateBlastLayer(domains, -1);
+        BlastLayer ^ bl = RTCV::CorruptCore::RtcCore::GenerateBlastLayer(domains, -1);
         if (bl != nullptr)
             bl->Apply(false, true);
     }
@@ -303,6 +295,7 @@ static void STEP_CORRUPT() // errors trapped by CPU_STEP
 void VanguardClientUnmanaged::CORE_STEP()
 {
     // Any step hook for corruption
+    ActionDistributor::Execute("ACTION");
     STEP_CORRUPT();
 }
 
@@ -453,7 +446,7 @@ bool VanguardClient::SaveState(String ^ filename)
 
     wxString mystring(converted_filename);
     UnmanagedWrapper::VANGUARD_SAVESTATE(mystring);
-	return true;
+    return true;
 }
 
 // No fun anonymous classes with closure here
@@ -463,7 +456,7 @@ void StopGame() //Todo
     // Core::Stop();
 }
 
-void Quit() 
+void Quit()
 {
     UnmanagedWrapper::VANGUARD_EXIT();
 }
@@ -530,7 +523,7 @@ void VanguardClient::OnMessageReceived(Object ^ sender, NetCoreEventArgs ^ e)
 
             String ^ path = nullptr;
             // Build up our path
-            path = RTCV::CorruptCore::CorruptCore::workingDir + IO::Path::DirectorySeparatorChar +
+            path = RTCV::CorruptCore::RtcCore::workingDir + IO::Path::DirectorySeparatorChar +
                    "SESSION" + IO::Path::DirectorySeparatorChar + prefix + "." + quickSlotName + ".State";
 
             // If the path doesn't exist, make it
@@ -538,7 +531,7 @@ void VanguardClient::OnMessageReceived(Object ^ sender, NetCoreEventArgs ^ e)
             if (file->Directory != nullptr && file->Directory->Exists == false)
                 file->Directory->Create();
 
-            if(ManagedGlobals::client->SaveState(path))
+            if (ManagedGlobals::client->SaveState(path))
                 e->setReturnValue(path);
         } break;
 

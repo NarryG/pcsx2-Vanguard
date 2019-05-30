@@ -27,6 +27,7 @@
 #include <wx/dir.h>
 #include <wx/txtstrm.h>
 #include <wx/zipstrm.h>
+#include "Vanguard/VanguardClient.h"
 
 // This is a declaration for PatchMemory.cpp::_ApplyPatch where we're (patch.cpp)
 // the only consumer, so it's not made public via Patch.h
@@ -354,6 +355,9 @@ namespace PatchFunc
 // This is for applying patches directly to memory
 void ApplyLoadedPatches(patch_place_type place)
 {
+
+    VanguardClientUnmanaged::CORE_STEP();
+
 	for (auto& i : Patch)
 	{
 		if (i.placetopatch == place)

@@ -10,6 +10,7 @@ public:
     static void VANGUARD_LOADSTATE(const wxString &file);
     static void VANGUARD_SAVESTATE(const wxString &file);
     static std::string VANGUARD_GETGAMENAME();
-    static void VANGUARD_INVOKEEMUTHREAD(void(*)());
+    static void EERAM_POKEBYTE(long long addr, unsigned char val);
+    static unsigned char EERAM_PEEKBYTE(long long addr);
 };
 
