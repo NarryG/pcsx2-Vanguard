@@ -4,6 +4,7 @@
 #include "AppSaveStates.h"
 #include "GameDatabase.h"
 #include "Memory.h"
+#include "IsoDropTarget.h"
 
 //C++/CLI has various restrictions (no std::mutex for example), so we can't actually include certain headers directly
 //What we CAN do is wrap those functions
@@ -15,12 +16,31 @@ void UnmanagedWrapper::VANGUARD_EXIT()
 
 void UnmanagedWrapper::VANGUARD_LOADSTATE(const wxString &file)
 {
-    StateCopy_LoadFromFile(file);
+    StateCopy_LoadFromFile(file, false);
 }
 
 void UnmanagedWrapper::VANGUARD_SAVESTATE(const wxString &file)
 {
     StateCopy_SaveToFile(file);
+}
+
+void UnmanagedWrapper::VANGUARD_RESUMEEMULATION()
+{
+    GetCoreThread().Resume(); 
+}
+
+void UnmanagedWrapper::VANGUARD_LOADGAME(const wxString& file)
+{
+
+    ScopedCoreThreadPause paused_core;
+
+    SysUpdateIsoSrcFile(file);
+    AppSaveSettings(); // save the new iso selection; update menus!
+    sApp.SysExecute(g_Conf->CdvdSource);
+
+//    SwapOrReset_Iso(wxTheApp->GetTopWindow(), core, isofile, "");
+  
+    //sApp.SysExecute(g_Conf->CdvdSource);
 }
 
 std::string UnmanagedWrapper::VANGUARD_GETGAMENAME()
@@ -45,3 +65,4 @@ unsigned char UnmanagedWrapper::EERAM_PEEKBYTE(long long addr)
 {
     return memRead8(static_cast<u32>(addr));
 }
+

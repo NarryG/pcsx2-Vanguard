@@ -30,6 +30,7 @@
 #include <memory>
 
 #include "Patch.h"
+#include "Vanguard/VanguardClient.h"
 
 // Used to hold the current state backup (fullcopy of PS2 memory and plugin states).
 //static VmStateBuffer state_buffer( L"Public Savestate Buffer" );
@@ -632,6 +633,7 @@ protected:
 		reader->Read( buffer.GetPtr(), foundInternal->GetSize() );
 
 		memLoadingState( buffer ).FreezeBios().FreezeInternals();
+        VanguardClientUnmanaged::LOAD_STATE_DONE();
 		GetCoreThread().Resume();	// force resume regardless of emulation state earlier.
 	}
 };

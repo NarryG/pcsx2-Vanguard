@@ -68,6 +68,8 @@ public:
     bool LoadRom(String ^ filename);
     bool LoadState(std::string filename);
     bool SaveState(String ^ filename);
+    ManualResetEvent ^ stateLoadedEvent = gcnew ManualResetEvent(false);
+    ManualResetEvent ^ statePostLoad = gcnew ManualResetEvent(false);
 
     //String ^ GetConfigAsJson(VanguardSettingsWrapper ^ settings);
     //VanguardSettingsWrapper ^ GetConfigFromJson(String ^ json);
@@ -78,7 +80,8 @@ public:
 
     array<String ^> ^ configPaths;
 
-    volatile bool loading = false;
+    volatile bool gameLoading = false;
+    volatile bool stateLoading = false;
 };
 
 ref class ManagedGlobals
@@ -106,6 +109,7 @@ static PartialSpec ^ getDefaultPartial() {
     partial->Set(VSPEC::OVERRIDE_DEFAULTMAXINTENSITY, 500000);
     partial->Set(VSPEC::SYNCSETTINGS, String::Empty);
     partial->Set(VSPEC::MEMORYDOMAINS_BLACKLISTEDDOMAINS, gcnew array<String ^>{});
+    partial->Set(VSPEC::LOADSTATE_USES_CALLBACKS, true);
     partial->Set(VSPEC::SYSTEM, String::Empty);
 
     return partial;
@@ -250,7 +254,7 @@ static array<MemoryDomainProxy ^> ^ GetInterfaces() {
     return interfaces;
 }
 
-    static bool RefreshDomains()
+static bool RefreshDomains()
 {
     auto interfaces = GetInterfaces();
     AllSpec::VanguardSpec->Update(VSPEC::MEMORYDOMAINS_INTERFACES, interfaces, true, true);
@@ -346,7 +350,17 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
     } catch (System::Exception ^ e) {
         Trace::WriteLine(e->ToString());
     }
-    ManagedGlobals::client->loading = false;
+    ManagedGlobals::client->gameLoading = false;
+}
+
+void VanguardClientUnmanaged::LOAD_STATE_DONE()
+{
+    ManagedGlobals::client->stateLoadedEvent->Set();
+}
+
+void VanguardClientUnmanaged::RESUME_EMULATION()
+{
+    UnmanagedWrapper::VANGUARD_RESUMEEMULATION();
 }
 
 void VanguardClientUnmanaged::GAME_CLOSED()
@@ -369,6 +383,7 @@ enum COMMANDS {
     REMOTE_ISNORMALADVANCE,
     REMOTE_EVENT_CLOSEEMULATOR,
     REMOTE_ALLSPECSSENT,
+    REMOTE_RESUMEEMULATION,
     UNKNOWN
 };
 
@@ -398,6 +413,8 @@ inline COMMANDS CheckCommand(String ^ inString)
         return REMOTE_EVENT_CLOSEEMULATOR;
     if (inString == "REMOTE_ALLSPECSSENT")
         return REMOTE_ALLSPECSSENT;
+    if (inString == "REMOTE_RESUMEEMULATION")
+        return REMOTE_RESUMEEMULATION;
     return UNKNOWN;
 }
 
@@ -416,13 +433,14 @@ bool VanguardClient::LoadRom(String ^ filename)
         //Config::ClearCurrentVanguardLayer();
 
         const std::string &path = Helpers::systemStringToUtf8String(filename);
-        ManagedGlobals::client->loading = true;
+        ManagedGlobals::client->gameLoading = true;
 
         //  SetState(Core::State::Paused);
         // VanguardClientInitializer::win->StartGame(path);
+        UnmanagedWrapper::VANGUARD_LOADGAME(wxString(path));
         // We have to do it this way to prevent deadlock due to synced calls. It sucks but it's required
         // at the moment
-        while (ManagedGlobals::client->loading) {
+        while (ManagedGlobals::client->gameLoading) {
             System::Threading::Thread::Sleep(20);
             System::Windows::Forms::Application::DoEvents();
         }
@@ -436,7 +454,9 @@ bool VanguardClient::LoadState(std::string filename)
 {
     StepActions::ClearStepBlastUnits();
     wxString mystring(filename);
+    ManagedGlobals::client->gameLoading = true;
     UnmanagedWrapper::VANGUARD_LOADSTATE(mystring);
+
     return true;
 }
 //Todo
@@ -575,6 +595,10 @@ void VanguardClient::OnMessageReceived(Object ^ sender, NetCoreEventArgs ^ e)
             ManagedGlobals::client->StopClient();
             g = gcnew SyncObjectSingleton::GenericDelegate(&Quit);
             SyncObjectSingleton::FormExecute(g);
+        } break;
+
+        case REMOTE_RESUMEEMULATION: {
+            UnmanagedWrapper::VANGUARD_RESUMEEMULATION();
         } break;
 
         default:
