@@ -654,7 +654,7 @@ void StateCopy_SaveToFile( const wxString& file )
 	ziplist.release();
 }
 
-void StateCopy_LoadFromFile( const wxString& file )
+void StateCopy_LoadFromFile(const wxString &file, bool resumeAfterLoad = true)
 {
 	UI_DisableSysActions();
 	GetSysExecutorThread().PostEvent(new SysExecEvent_UnzipFromDisk( file ));
