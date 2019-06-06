@@ -46,7 +46,8 @@ std::string UnmanagedWrapper::VANGUARD_GETGAMENAME()
             }
         }
     }
-    return "UNKNOWNGAME";
+    //We can't find the name so return the id
+    return curGameKey.ToStdString();
 }
 
 void UnmanagedWrapper::EERAM_POKEBYTE(long long addr, unsigned char val)
