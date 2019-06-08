@@ -61,7 +61,7 @@ public:
     static void RestartClient();
     static void StopClient();
 
-    static bool LoadRom(String ^filename);
+    static void LoadRom(String ^filename);
     static bool LoadState(std::string filename);
     static bool SaveState(String ^filename);
 
@@ -71,7 +71,7 @@ public:
     static String ^emuDir = IO::Path::GetDirectoryName(Assembly::GetExecutingAssembly()->Location);
     static String ^logPath = IO::Path::Combine(emuDir, "EMU_LOG.txt");
 
-    static array<String ^> ^configPaths;
+    static array<String ^> ^ configPaths;
 
     static volatile bool gameLoading = false;
     static volatile bool stateLoading = false;
@@ -183,7 +183,12 @@ void VanguardClientInitializer::StartVanguardClient()
     SyncObjectSingleton::UseQueue = true;
 
     //Todo
-    VanguardClient::configPaths = gcnew array<String ^>{};
+    VanguardClient::configPaths = gcnew array<String ^>{
+        IO::Path::Combine(VanguardClient::emuDir, "inis", "FWnull.ini"),
+        IO::Path::Combine(VanguardClient::emuDir, "inis", "GSdx.ini"),
+        IO::Path::Combine(VanguardClient::emuDir, "inis", "PCSX2_vm.ini"),
+        IO::Path::Combine(VanguardClient::emuDir, "inis", "WiimoteNew.ini"),
+        IO::Path::Combine(VanguardClient::emuDir, "inis", "SPU2-X.ini")};
 
     VanguardClient::StartClient();
     VanguardClient::RegisterVanguardSpec();
@@ -221,6 +226,7 @@ void VanguardClient::StartClient()
 
     receiver = gcnew NetCoreReceiver();
     receiver->Attached = attached;
+    receiver->MessageReceived +=  gcnew EventHandler<NetCoreEventArgs ^>(&VanguardClient::OnMessageReceived);
     connector = gcnew VanguardConnector(receiver);
 }
 
@@ -427,8 +433,7 @@ inline COMMANDS CheckCommand(String ^inString)
 
 /* IMPLEMENT YOUR COMMANDS HERE */
 
-//Todo
-bool VanguardClient::LoadRom(String ^filename)
+void VanguardClient::LoadRom(String ^filename)
 {
     String ^currentOpenRom = "";
     if (AllSpec::VanguardSpec->Get<String ^>(VSPEC::OPENROMFILENAME) != "")
@@ -450,7 +455,7 @@ bool VanguardClient::LoadRom(String ^filename)
         }
         Thread::Sleep(100); // Give the emu thread a chance to recover
     }
-    return true;
+    return;
 }
 
 bool VanguardClient::LoadState(std::string filename)
@@ -468,6 +473,7 @@ bool VanguardClient::SaveState(String ^filename)
     std::string converted_filename = Helpers::systemStringToUtf8String(filename);
     wxString mystring(converted_filename);
     UnmanagedWrapper::VANGUARD_SAVESTATE(mystring);
+    Thread::Sleep(100);
     return true;
 }
 
@@ -559,7 +565,9 @@ void VanguardClient::OnMessageReceived(Object ^sender, NetCoreEventArgs ^e)
 
         case REMOTE_LOADROM: {
             String ^filename = (String ^)advancedMessage->objectValue;
-            LoadRom(filename);
+
+            System::Action<String ^> ^ a = gcnew Action<String ^>(&LoadRom);
+            SyncObjectSingleton::FormExecute<String ^>(a, filename);
         }
         break;
 
