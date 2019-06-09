@@ -476,8 +476,8 @@ bool VanguardClient::LoadState(std::string filename)
         Thread::Sleep(20);
         System::Windows::Forms::Application::DoEvents();
 
-        //We wait for 20 ms every time. If loading a state takes more than 8 seconds, break out.
-        if (++i > 400)
+        //We wait for 20 ms every time. If loading a state takes more than 15 seconds, break out.
+        if (++i > 750)
             stateLoading = false;
     }
 

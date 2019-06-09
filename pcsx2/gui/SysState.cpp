@@ -496,16 +496,17 @@ class SysExecEvent_UnzipFromDisk : public SysExecEvent
 {
 protected:
 	wxString	m_filename;
+    bool continueAfterLoad;
 
 public:
 	wxString GetEventName() const { return L"VM_UnzipFromDisk"; }
 
-	virtual ~SysExecEvent_UnzipFromDisk() = default;
-	SysExecEvent_UnzipFromDisk* Clone() const { return new SysExecEvent_UnzipFromDisk( *this ); }
-	SysExecEvent_UnzipFromDisk( const wxString& filename )
-		: m_filename( filename )
-	{
-	}
+    virtual ~SysExecEvent_UnzipFromDisk() = default;
+    SysExecEvent_UnzipFromDisk *Clone() const { return new SysExecEvent_UnzipFromDisk(*this); }
+    SysExecEvent_UnzipFromDisk(const wxString &filename, bool _continueAfterLoad = true)
+        : m_filename(filename), continueAfterLoad(_continueAfterLoad)
+    {
+    }
 
 	wxString GetStreamName() const { return m_filename; }
 
@@ -657,7 +658,7 @@ void StateCopy_SaveToFile( const wxString& file )
 void StateCopy_LoadFromFile(const wxString &file, bool resumeAfterLoad = true)
 {
 	UI_DisableSysActions();
-	GetSysExecutorThread().PostEvent(new SysExecEvent_UnzipFromDisk( file ));
+	GetSysExecutorThread().PostEvent(new SysExecEvent_UnzipFromDisk( file , resumeAfterLoad));
 }
 
 // Saves recovery state info to the given saveslot, or saves the active emulation state
