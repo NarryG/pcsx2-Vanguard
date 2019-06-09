@@ -487,7 +487,8 @@ bool VanguardClient::SaveState(String ^filename)
 #pragma region Delegates
 void StopGame() //Todo
 {
-    // Core::Stop();
+    UnmanagedWrapper::VANGUARD_STOPGAME();
+    Thread::Sleep(100);
 }
 
 void Quit()

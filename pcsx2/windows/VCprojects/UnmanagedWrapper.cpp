@@ -25,10 +25,16 @@ void UnmanagedWrapper::VANGUARD_SAVESTATE(const wxString &file)
 
 void UnmanagedWrapper::VANGUARD_RESUMEEMULATION()
 {
-    GetCoreThread().Resume(); 
+    GetCoreThread().Resume();
 }
 
-void UnmanagedWrapper::VANGUARD_LOADGAME(const wxString& file)
+void UnmanagedWrapper::VANGUARD_STOPGAME()
+{
+    UI_DisableSysShutdown();
+    Console.SetTitle("PCSX2 Program Log");
+    CoreThread.Reset();
+} 
+void UnmanagedWrapper::VANGUARD_LOADGAME(const wxString &file)
 {
     ScopedCoreThreadPause paused_core;
     SysUpdateIsoSrcFile(file);
@@ -59,4 +65,3 @@ unsigned char UnmanagedWrapper::EERAM_PEEKBYTE(long long addr)
 {
     return memRead8(static_cast<u32>(addr));
 }
-
