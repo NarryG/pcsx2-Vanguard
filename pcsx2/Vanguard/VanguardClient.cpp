@@ -450,9 +450,14 @@ void VanguardClient::LoadRom(String ^filename)
         UnmanagedWrapper::VANGUARD_LOADGAME(wxString(path));
 
         // We have to do it this way to prevent deadlock due to synced calls. It sucks but it's required at the moment
+        int i = 0;
         while (gameLoading) {
             Thread::Sleep(20);
             System::Windows::Forms::Application::DoEvents();
+
+            //We wait for 20 ms every time. If loading a game takes longer than 15 seconds, break out.
+            if (++i > 750)
+                gameLoading = false;
         }
         Thread::Sleep(100); // Give the emu thread a chance to recover
     }
@@ -466,9 +471,14 @@ bool VanguardClient::LoadState(std::string filename)
     wxString mystring(filename);
     stateLoading = true;
     UnmanagedWrapper::VANGUARD_LOADSTATE(mystring);
+    int i = 0;
     while (stateLoading) {
         Thread::Sleep(20);
         System::Windows::Forms::Application::DoEvents();
+
+        //We wait for 20 ms every time. If loading a state takes more than 8 seconds, break out.
+        if (++i > 400)
+            stateLoading = false;
     }
 
     return true;
