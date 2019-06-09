@@ -4,6 +4,7 @@
 #include "AppSaveStates.h"
 #include "GameDatabase.h"
 #include "Memory.h"
+#include "Cache.h"
 
 //C++/CLI has various restrictions (no std::mutex for example), so we can't actually include certain headers directly
 //What we CAN do is wrap those functions
@@ -44,16 +45,18 @@ void UnmanagedWrapper::VANGUARD_LOADGAME(const wxString &file)
 
 std::string UnmanagedWrapper::VANGUARD_GETGAMENAME()
 {
-    if (!curGameKey.IsEmpty()) {
+
+    const wxString newGameKey(SysGetDiscID());
+    if (!newGameKey.IsEmpty()) {
         if (IGameDatabase *GameDB = AppHost_GetGameDatabase()) {
             Game_Data game;
-            if (GameDB->findGame(game, curGameKey)) {
+            if (GameDB->findGame(game, newGameKey)) {
                 return game.getString("Name").ToStdString();
             }
         }
     }
     //We can't find the name so return the id
-    return curGameKey.ToStdString();
+    return newGameKey.ToStdString();
 }
 
 void UnmanagedWrapper::EERAM_POKEBYTE(long long addr, unsigned char val)
