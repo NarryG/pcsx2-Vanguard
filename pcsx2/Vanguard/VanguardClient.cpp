@@ -368,6 +368,7 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
 
 void VanguardClientUnmanaged::LOAD_STATE_DONE()
 {
+    VanguardClient::stateLoading = false;
 }
 
 void VanguardClientUnmanaged::RESUME_EMULATION()
@@ -461,9 +462,14 @@ void VanguardClient::LoadRom(String ^filename)
 bool VanguardClient::LoadState(std::string filename)
 {
     StepActions::ClearStepBlastUnits();
+    CPU_STEP_Count = 0;
     wxString mystring(filename);
     stateLoading = true;
     UnmanagedWrapper::VANGUARD_LOADSTATE(mystring);
+    while (stateLoading) {
+        Thread::Sleep(20);
+        System::Windows::Forms::Application::DoEvents();
+    }
 
     return true;
 }

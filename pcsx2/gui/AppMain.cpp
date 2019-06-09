@@ -40,6 +40,7 @@
 #include "Utilities/AppTrait.h"
 
 #include <wx/stdpaths.h>
+#include "Vanguard/VanguardClient.h"
 
 #ifdef __WXMSW__
 #include <wx/msw/wrapwin.h> // needed to implement the app!
@@ -1169,6 +1170,7 @@ void SysStatus(const wxString &text)
 // Applies a new active iso source file
 void SysUpdateIsoSrcFile(const wxString &newIsoFile)
 {
+    VanguardClientUnmanaged::LOAD_GAME_START(newIsoFile.ToStdString());
     g_Conf->CurrentIso = newIsoFile;
     sMainFrame.UpdateIsoSrcSelection();
 }
