@@ -378,7 +378,7 @@ void VanguardClientUnmanaged::RESUME_EMULATION()
 
 void VanguardClientUnmanaged::GAME_CLOSED()
 {
-    AllSpec::VanguardSpec->Update(VSPEC::OPENROMFILENAME, "", true, true);
+    AllSpec::VanguardSpec->Update(VSPEC::OPENROMFILENAME, "", true, false);
 }
 #pragma endregion
 
