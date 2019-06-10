@@ -635,8 +635,9 @@ protected:
 
 		memLoadingState( buffer ).FreezeBios().FreezeInternals();
         VanguardClientUnmanaged::LOAD_STATE_DONE();
-		GetCoreThread().Resume();	// force resume regardless of emulation state earlier.
-	}
+        if (continueAfterLoad)
+            GetCoreThread().Resume(); // force resume regardless of emulation state earlier.
+    }
 };
 
 // =====================================================================================================
