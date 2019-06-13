@@ -47,41 +47,41 @@ static int CPU_STEP_Count = 0;
 
 // Define this in here as it's managed and weird stuff happens if it's in a header
 public
-    ref class VanguardClient
+ref class VanguardClient
 {
 public:
-    static NetCoreReceiver ^receiver;
-    static VanguardConnector ^connector;
+    static NetCoreReceiver ^ receiver;
+    static VanguardConnector ^ connector;
 
-    static void OnMessageReceived(Object ^sender, NetCoreEventArgs ^e);
-    static void SpecUpdated(Object ^sender, SpecUpdateEventArgs ^e);
+    static void OnMessageReceived(Object ^ sender, NetCoreEventArgs ^ e);
+    static void SpecUpdated(Object ^ sender, SpecUpdateEventArgs ^ e);
     static void RegisterVanguardSpec();
 
     static void StartClient();
     static void RestartClient();
     static void StopClient();
 
-    static void LoadRom(String ^filename);
+    static void LoadRom(String ^ filename);
     static bool LoadState(std::string filename);
-    static bool SaveState(String ^filename);
+    static bool SaveState(String ^ filename);
 
     //String ^ GetConfigAsJson(VanguardSettingsWrapper ^ settings);
     //VanguardSettingsWrapper ^ GetConfigFromJson(String ^ json);
 
-    static String ^emuDir = IO::Path::GetDirectoryName(Assembly::GetExecutingAssembly()->Location);
-    static String ^logPath = IO::Path::Combine(emuDir, "EMU_LOG.txt");
+    static String ^ emuDir = IO::Path::GetDirectoryName(Assembly::GetExecutingAssembly()->Location);
+    static String ^ logPath = IO::Path::Combine(emuDir, "EMU_LOG.txt");
 
     static array<String ^> ^ configPaths;
 
     static volatile bool gameLoading = false;
-    static volatile bool stateLoading = false;
+    //static volatile bool stateLoading = false;
+    static ManualResetEvent ^ stateLoading = gcnew ManualResetEvent(false);
     static bool attached = false;
 };
 
 
-static PartialSpec ^getDefaultPartial()
-{
-    PartialSpec ^partial = gcnew PartialSpec("VanguardSpec");
+static PartialSpec ^ getDefaultPartial() {
+    PartialSpec ^ partial = gcnew PartialSpec("VanguardSpec");
     partial->Set(VSPEC::NAME, "PCSX2");
     partial->Set(VSPEC::SUPPORTS_RENDERING, false);
     partial->Set(VSPEC::SUPPORTS_CONFIG_MANAGEMENT, false);
@@ -104,9 +104,9 @@ static PartialSpec ^getDefaultPartial()
     return partial;
 }
 
-void VanguardClient::SpecUpdated(Object ^sender, SpecUpdateEventArgs ^e)
+    void VanguardClient::SpecUpdated(Object ^ sender, SpecUpdateEventArgs ^ e)
 {
-    PartialSpec ^partial = e->partialSpec;
+    PartialSpec ^ partial = e->partialSpec;
 
     LocalNetCoreRouter::Route(NetcoreCommands::CORRUPTCORE,
                               NetcoreCommands::REMOTE_PUSHVANGUARDSPECUPDATE, partial, true);
@@ -117,7 +117,7 @@ void VanguardClient::SpecUpdated(Object ^sender, SpecUpdateEventArgs ^e)
 
 void VanguardClient::RegisterVanguardSpec()
 {
-    PartialSpec ^emuSpecTemplate = gcnew PartialSpec("VanguardSpec");
+    PartialSpec ^ emuSpecTemplate = gcnew PartialSpec("VanguardSpec");
 
     emuSpecTemplate->Insert(getDefaultPartial());
 
@@ -133,28 +133,27 @@ void VanguardClient::RegisterVanguardSpec()
 }
 
 // Lifted from Bizhawk
-static Assembly ^CurrentDomain_AssemblyResolve(Object ^sender, ResolveEventArgs ^args)
-{
+static Assembly ^ CurrentDomain_AssemblyResolve(Object ^ sender, ResolveEventArgs ^ args) {
     try {
         Trace::WriteLine("Entering AssemblyResolve\n" + args->Name + "\n" +
                          args->RequestingAssembly);
-        String ^requested = args->Name;
+        String ^ requested = args->Name;
         Monitor::Enter(AppDomain::CurrentDomain);
         {
-            array<Assembly ^> ^asms = AppDomain::CurrentDomain->GetAssemblies();
+            array<Assembly ^> ^ asms = AppDomain::CurrentDomain->GetAssemblies();
             for (int i = 0; i < asms->Length; i++) {
-                Assembly ^a = asms[i];
+                Assembly ^ a = asms[i];
                 if (a->FullName == requested) {
                     return a;
                 }
             }
 
-            AssemblyName ^n = gcnew AssemblyName(requested);
+            AssemblyName ^ n = gcnew AssemblyName(requested);
             // load missing assemblies by trying to find them in the dll directory
-            String ^dllname = n->Name + ".dll";
-            String ^directory = IO::Path::Combine(
+            String ^ dllname = n->Name + ".dll";
+            String ^ directory = IO::Path::Combine(
                 IO::Path::GetDirectoryName(Assembly::GetExecutingAssembly()->Location), "..", "RTCV");
-            String ^fname = IO::Path::Combine(directory, dllname);
+            String ^ fname = IO::Path::Combine(directory, dllname);
             if (!IO::File::Exists(fname)) {
                 Trace::WriteLine(fname + " doesn't exist");
                 return nullptr;
@@ -165,7 +164,7 @@ static Assembly ^CurrentDomain_AssemblyResolve(Object ^sender, ResolveEventArgs 
             Trace::WriteLine("Loading " + fname);
             return Assembly::LoadFile(fname);
         }
-    } catch (Exception ^e) {
+    } catch (Exception ^ e) {
         Trace::WriteLine("Something went really wrong in AssemblyResolve. Send this to the devs\n" +
                          e);
         return nullptr;
@@ -174,10 +173,10 @@ static Assembly ^CurrentDomain_AssemblyResolve(Object ^sender, ResolveEventArgs 
     }
 }
 
-// Create our VanguardClient
-void VanguardClientInitializer::StartVanguardClient()
+    // Create our VanguardClient
+    void VanguardClientInitializer::StartVanguardClient()
 {
-    System::Windows::Forms::Form ^dummy = gcnew System::Windows::Forms::Form();
+    System::Windows::Forms::Form ^ dummy = gcnew System::Windows::Forms::Form();
     IntPtr Handle = dummy->Handle;
     SyncObjectSingleton::SyncObject = dummy;
     SyncObjectSingleton::UseQueue = true;
@@ -226,7 +225,7 @@ void VanguardClient::StartClient()
 
     receiver = gcnew NetCoreReceiver();
     receiver->Attached = attached;
-    receiver->MessageReceived +=  gcnew EventHandler<NetCoreEventArgs ^>(&VanguardClient::OnMessageReceived);
+    receiver->MessageReceived += gcnew EventHandler<NetCoreEventArgs ^>(&VanguardClient::OnMessageReceived);
     connector = gcnew VanguardConnector(receiver);
 }
 
@@ -244,18 +243,17 @@ void VanguardClient::StopClient()
 }
 
 #pragma region MemoryDomains
-static array<MemoryDomainProxy ^> ^GetInterfaces()
-{
-    array<MemoryDomainProxy ^> ^interfaces = gcnew array<MemoryDomainProxy ^>(1);
+static array<MemoryDomainProxy ^> ^ GetInterfaces() {
+    array<MemoryDomainProxy ^> ^ interfaces = gcnew array<MemoryDomainProxy ^>(1);
     interfaces[0] = gcnew MemoryDomainProxy(gcnew EERAM);
 
     return interfaces;
 }
 
-static bool RefreshDomains(bool updateSpecs = true)
+    static bool RefreshDomains(bool updateSpecs = true)
 {
-    array<MemoryDomainProxy ^> ^oldInterfaces = AllSpec::VanguardSpec->Get<array<MemoryDomainProxy ^> ^>(VSPEC::MEMORYDOMAINS_INTERFACES);
-    array<MemoryDomainProxy ^> ^newInterfaces = GetInterfaces();
+    array<MemoryDomainProxy ^> ^ oldInterfaces = AllSpec::VanguardSpec->Get<array<MemoryDomainProxy ^> ^>(VSPEC::MEMORYDOMAINS_INTERFACES);
+    array<MemoryDomainProxy ^> ^ newInterfaces = GetInterfaces();
 
     // Bruteforce it since domains can change inconsistently in some configs and we keep code consistent between implementations
     bool domainsChanged = oldInterfaces->Length != newInterfaces->Length;
@@ -300,9 +298,9 @@ static void STEP_CORRUPT() // errors trapped by CPU_STEP
     long errorDelay = RtcCore::ErrorDelay;
     if (autoCorrupt && CPU_STEP_Count >= errorDelay) {
         CPU_STEP_Count = 0;
-        array<String ^> ^domains = AllSpec::UISpec->Get<array<String ^> ^>("SELECTEDDOMAINS");
+        array<String ^> ^ domains = AllSpec::UISpec->Get<array<String ^> ^>("SELECTEDDOMAINS");
 
-        BlastLayer ^bl = RtcCore::GenerateBlastLayer(domains, -1);
+        BlastLayer ^ bl = RtcCore::GenerateBlastLayer(domains, -1);
         if (bl != nullptr)
             bl->Apply(false, true);
     }
@@ -322,13 +320,13 @@ void VanguardClientUnmanaged::LOAD_GAME_START(std::string romPath)
     StepActions::ClearStepBlastUnits();
     CPU_STEP_Count = 0;
 
-    String ^gameName = Helpers::utf8StringToSystemString(romPath);
+    String ^ gameName = Helpers::utf8StringToSystemString(romPath);
     AllSpec::VanguardSpec->Update(VSPEC::OPENROMFILENAME, gameName, true, true);
 }
 
 void VanguardClientUnmanaged::LOAD_GAME_DONE()
 {
-    PartialSpec ^gameDone = gcnew PartialSpec("VanguardSpec");
+    PartialSpec ^ gameDone = gcnew PartialSpec("VanguardSpec");
 
     try {
         gameDone->Set(VSPEC::SYSTEM, "PCSX2");
@@ -339,17 +337,17 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
         gameDone->Set(VSPEC::MEMORYDOMAINS_INTERFACES, GetInterfaces());
         gameDone->Set(VSPEC::CORE_DISKBASED, true);
 
-        String ^oldGame = AllSpec::VanguardSpec->Get<String ^>(VSPEC::GAMENAME);
+        String ^ oldGame = AllSpec::VanguardSpec->Get<String ^>(VSPEC::GAMENAME);
 
-        String ^gameName = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_GETGAMENAME());
+        String ^ gameName = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_GETGAMENAME());
 
         char replaceChar = L'-';
         gameDone->Set(VSPEC::GAMENAME, CorruptCore_Extensions::MakeSafeFilename(gameName, replaceChar));
 
 
-        //Todo
-        //String^ syncsettings = VanguardClient::GetConfigAsJson(VanguardSettings::GetVanguardSettingsFromDolphin());
-        //gameDone->Set(VSPEC::SYNCSETTINGS, syncsettings);
+        
+        String ^ syncsettings = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_SAVECONFIG());
+        gameDone->Set(VSPEC::SYNCSETTINGS, syncsettings);
 
         AllSpec::VanguardSpec->Update(gameDone, true, false);
 
@@ -360,7 +358,7 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
         if (oldGame != gameName) {
             LocalNetCoreRouter::Route(NetcoreCommands::UI, NetcoreCommands::RESET_GAME_PROTECTION_IF_RUNNING, true);
         }
-    } catch (Exception ^e) {
+    } catch (Exception ^ e) {
         Trace::WriteLine(e->ToString());
     }
     VanguardClient::gameLoading = false;
@@ -368,12 +366,12 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
 
 void VanguardClientUnmanaged::LOAD_STATE_DONE()
 {
-    VanguardClient::stateLoading = false;
+    VanguardClient::stateLoading->Set();
 }
 
 void VanguardClientUnmanaged::RESUME_EMULATION()
 {
-    UnmanagedWrapper::VANGUARD_RESUMEEMULATION();
+    //UnmanagedWrapper::VANGUARD_RESUMEEMULATION();
 }
 
 void VanguardClientUnmanaged::GAME_CLOSED()
@@ -383,8 +381,7 @@ void VanguardClientUnmanaged::GAME_CLOSED()
 #pragma endregion
 
 /*ENUMS FOR THE SWITCH STATEMENT*/
-enum COMMANDS
-{
+enum COMMANDS {
     SAVESAVESTATE,
     LOADSAVESTATE,
     REMOTE_LOADROM,
@@ -401,7 +398,7 @@ enum COMMANDS
     UNKNOWN
 };
 
-inline COMMANDS CheckCommand(String ^inString)
+inline COMMANDS CheckCommand(String ^ inString)
 {
     if (inString == "LOADSAVESTATE")
         return LOADSAVESTATE;
@@ -434,9 +431,9 @@ inline COMMANDS CheckCommand(String ^inString)
 
 /* IMPLEMENT YOUR COMMANDS HERE */
 
-void VanguardClient::LoadRom(String ^filename)
+void VanguardClient::LoadRom(String ^ filename)
 {
-    String ^currentOpenRom = "";
+    String ^ currentOpenRom = "";
     if (AllSpec::VanguardSpec->Get<String ^>(VSPEC::OPENROMFILENAME) != "")
         currentOpenRom = AllSpec::VanguardSpec->Get<String ^>(VSPEC::OPENROMFILENAME);
 
@@ -469,22 +466,11 @@ bool VanguardClient::LoadState(std::string filename)
     StepActions::ClearStepBlastUnits();
     CPU_STEP_Count = 0;
     wxString mystring(filename);
-    stateLoading = true;
     UnmanagedWrapper::VANGUARD_LOADSTATE(mystring);
-    int i = 0;
-    while (stateLoading) {
-        Thread::Sleep(20);
-        System::Windows::Forms::Application::DoEvents();
-
-        //We wait for 20 ms every time. If loading a state takes more than 15 seconds, break out.
-        if (++i > 750)
-            stateLoading = false;
-    }
-
-    return true;
+    return stateLoading->WaitOne(10000);
 }
 
-bool VanguardClient::SaveState(String ^filename)
+bool VanguardClient::SaveState(String ^ filename)
 {
     std::string converted_filename = Helpers::systemStringToUtf8String(filename);
     wxString mystring(converted_filename);
@@ -513,11 +499,11 @@ void AllSpecsSent()
 #pragma endregion
 
 /* THIS IS WHERE YOU HANDLE ANY RECEIVED MESSAGES */
-void VanguardClient::OnMessageReceived(Object ^sender, NetCoreEventArgs ^e)
+void VanguardClient::OnMessageReceived(Object ^ sender, NetCoreEventArgs ^ e)
 {
-    NetCoreMessage ^message = e->message;
-    NetCoreSimpleMessage ^simpleMessage;
-    NetCoreAdvancedMessage ^advancedMessage;
+    NetCoreMessage ^ message = e->message;
+    NetCoreSimpleMessage ^ simpleMessage;
+    NetCoreAdvancedMessage ^ advancedMessage;
 
     if (Helpers::is<NetCoreSimpleMessage ^>(message))
         simpleMessage = static_cast<NetCoreSimpleMessage ^>(message);
@@ -526,116 +512,102 @@ void VanguardClient::OnMessageReceived(Object ^sender, NetCoreEventArgs ^e)
 
     switch (CheckCommand(message->Type)) {
         case REMOTE_ALLSPECSSENT: {
-            SyncObjectSingleton::GenericDelegate ^g =
+            SyncObjectSingleton::GenericDelegate ^ g =
                 gcnew SyncObjectSingleton::GenericDelegate(&AllSpecsSent);
             SyncObjectSingleton::FormExecute(g);
-        }
-        break;
+        } break;
 
         case LOADSAVESTATE: {
-            array<Object ^> ^cmd = static_cast<array<Object ^> ^>(advancedMessage->objectValue);
-            String ^path = static_cast<String ^>(cmd[0]);
+            array<Object ^> ^ cmd = static_cast<array<Object ^> ^>(advancedMessage->objectValue);
+            String ^ path = static_cast<String ^>(cmd[0]);
             std::string converted_path = Helpers::systemStringToUtf8String(path);
-            StashKeySavestateLocation ^location = safe_cast<StashKeySavestateLocation ^>(cmd[1]);
+            StashKeySavestateLocation ^ location = safe_cast<StashKeySavestateLocation ^>(cmd[1]);
 
             // Clear out any old settings
             // Config::ClearCurrentVanguardLayer();
 
             // Load up the sync settings //Todo
-            String ^settingStr = AllSpec::VanguardSpec->Get<String ^>(VSPEC::SYNCSETTINGS);
+            String ^ settingStr = AllSpec::VanguardSpec->Get<String ^>(VSPEC::SYNCSETTINGS);
             if (settingStr != nullptr) {
-                //  VanguardSettingsWrapper^ settings = GetConfigFromJson(settingStr);
-                //  if (settings != nullptr)
-                //   AddLayer(ConfigLoaders::GenerateVanguardConfigLoader(
-                //      &VanguardSettings::GetVanguardSettingFromVanguardSettingsWrapper(settings)));
+                std::string ss = Helpers::systemStringToUtf8String(settingStr);
+                UnmanagedWrapper::VANGUARD_LOADCONFIG(wxString(ss));
             }
             e->setReturnValue(LoadState(converted_path));
-        }
-        break;
+        } break;
 
         case SAVESAVESTATE: {
-            String ^Key = (String ^)(advancedMessage->objectValue);
+            String ^ Key = (String ^)(advancedMessage->objectValue);
             // Build the shortname
-            String ^quickSlotName = Key + ".timejump";
+            String ^ quickSlotName = Key + ".timejump";
 
             // Get the prefix for the state
 
-            String ^gameName = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_GETGAMENAME());
+            String ^ gameName = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_GETGAMENAME());
 
             char replaceChar = L'-';
-            String ^prefix = CorruptCore_Extensions::MakeSafeFilename(gameName, replaceChar);
+            String ^ prefix = CorruptCore_Extensions::MakeSafeFilename(gameName, replaceChar);
             prefix = prefix->Substring(prefix->LastIndexOf('\\') + 1);
 
             // Build up our path
-            String ^path = RtcCore::workingDir + IO::Path::DirectorySeparatorChar +
-                           "SESSION" + IO::Path::DirectorySeparatorChar + prefix + "." + quickSlotName + ".State";
+            String ^ path = RtcCore::workingDir + IO::Path::DirectorySeparatorChar +
+                            "SESSION" + IO::Path::DirectorySeparatorChar + prefix + "." + quickSlotName + ".State";
 
             // If the path doesn't exist, make it
-            IO::FileInfo ^file = gcnew IO::FileInfo(path);
+            IO::FileInfo ^ file = gcnew IO::FileInfo(path);
             if (file->Directory != nullptr && file->Directory->Exists == false)
                 file->Directory->Create();
 
             if (SaveState(path))
                 e->setReturnValue(path);
-        }
-        break;
+        } break;
 
         case REMOTE_LOADROM: {
-            String ^filename = (String ^)advancedMessage->objectValue;
+            String ^ filename = (String ^) advancedMessage->objectValue;
 
             System::Action<String ^> ^ a = gcnew Action<String ^>(&LoadRom);
             SyncObjectSingleton::FormExecute<String ^>(a, filename);
-        }
-        break;
+        } break;
 
         case REMOTE_CLOSEGAME: {
-            SyncObjectSingleton::GenericDelegate ^g =
+            SyncObjectSingleton::GenericDelegate ^ g =
                 gcnew SyncObjectSingleton::GenericDelegate(&StopGame);
             SyncObjectSingleton::FormExecute(g);
-        }
-        break;
+        } break;
 
         case REMOTE_DOMAIN_GETDOMAINS: {
             RefreshDomains();
-        }
-        break;
+        } break;
 
         case REMOTE_KEY_SETSYNCSETTINGS: {
-            String ^settings = (String ^)(advancedMessage->objectValue);
+            String ^ settings = (String ^)(advancedMessage->objectValue);
             AllSpec::VanguardSpec->Set(VSPEC::SYNCSETTINGS, settings);
-        }
-        break;
+        } break;
 
         case REMOTE_KEY_SETSYSTEMCORE: {
             // Do nothing
-        }
-        break;
+        } break;
 
         case REMOTE_EVENT_EMUSTARTED: {
-        }
-        break;
+        } break;
 
         case REMOTE_ISNORMALADVANCE: {
             // Todo - Dig out fast forward?
             e->setReturnValue(true);
-        }
-        break;
+        } break;
 
         case REMOTE_EVENT_EMU_MAINFORM_CLOSE:
         case REMOTE_EVENT_CLOSEEMULATOR: {
-            SyncObjectSingleton::GenericDelegate ^g =
+            SyncObjectSingleton::GenericDelegate ^ g =
                 gcnew SyncObjectSingleton::GenericDelegate(&StopGame);
             SyncObjectSingleton::FormExecute(g);
             StopClient();
             g = gcnew SyncObjectSingleton::GenericDelegate(&Quit);
             SyncObjectSingleton::FormExecute(g);
-        }
-            break;
+        } break;
 
         case REMOTE_RESUMEEMULATION: {
             UnmanagedWrapper::VANGUARD_RESUMEEMULATION();
-        }
-        break;
+        } break;
 
         default:
             break;

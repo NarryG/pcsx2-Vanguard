@@ -15,5 +15,7 @@ public:
     static std::string VANGUARD_GETGAMENAME();
     static void EERAM_POKEBYTE(long long addr, unsigned char val);
     static unsigned char EERAM_PEEKBYTE(long long addr);
+    static std::string VANGUARD_SAVECONFIG();
+    static void VANGUARD_LOADCONFIG(wxString cfg);
 };
 
