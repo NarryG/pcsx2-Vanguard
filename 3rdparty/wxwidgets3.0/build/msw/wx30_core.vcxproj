@@ -55,7 +55,6 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PreprocessorDefinitions>wxUSE_BASE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

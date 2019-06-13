@@ -50,7 +50,6 @@
       <PreprocessorDefinitions>HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>$(ProjectDir);xz/src/liblzma/common;xz/src/common;xz/src/liblzma/api;xz/src/liblzma/check;xz/src/liblzma/delta;xz/src/liblzma/lz;xz/src/liblzma/lzma;xz/src/liblzma/rangecoder;xz/src/liblzma/simple</AdditionalIncludeDirectories>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
