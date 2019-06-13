@@ -72,6 +72,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Global.h</PrecompiledHeaderFile>
       <CompileAs>Default</CompileAs>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>rpcrt4.lib;winmm.lib;dsound.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>

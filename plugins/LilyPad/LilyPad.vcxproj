@@ -49,6 +49,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Global.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>4995;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Setupapi.lib;Winmm.lib;Comdlg32.lib;dinput8.lib;dxguid.lib;comctl32.lib;hid.lib;%(AdditionalDependencies)</AdditionalDependencies>
