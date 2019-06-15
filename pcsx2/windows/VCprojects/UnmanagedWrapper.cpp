@@ -42,7 +42,7 @@ void UnmanagedWrapper::VANGUARD_LOADGAME(const wxString &file)
     ScopedCoreThreadPause paused_core;
     SysUpdateIsoSrcFile(file);
     AppSaveSettings(); // save the new iso selection; update menus!
-    sApp.SysExecute(g_Conf->CdvdSource, wxEmptyString, true);
+    sApp.SysExecute(g_Conf->CdvdSource, wxEmptyString);
 }
 
 std::string UnmanagedWrapper::VANGUARD_GETGAMENAME()
