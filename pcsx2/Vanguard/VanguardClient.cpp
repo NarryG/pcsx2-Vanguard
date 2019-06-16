@@ -74,8 +74,7 @@ public:
     static array<String ^> ^ configPaths;
 
     static volatile bool gameLoading = false;
-    //static volatile bool stateLoading = false;
-    static ManualResetEvent ^ stateLoading = gcnew ManualResetEvent(false);
+    static volatile bool stateLoading = false;
     static bool attached = false;
 };
 
@@ -366,12 +365,7 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
 
 void VanguardClientUnmanaged::LOAD_STATE_DONE()
 {
-    VanguardClient::stateLoading->Set();
-}
-
-void VanguardClientUnmanaged::RESUME_EMULATION()
-{
-    //UnmanagedWrapper::VANGUARD_RESUMEEMULATION();
+    VanguardClient::stateLoading = false;
 }
 
 void VanguardClientUnmanaged::GAME_CLOSED()
@@ -468,8 +462,21 @@ bool VanguardClient::LoadState(std::string filename)
     StepActions::ClearStepBlastUnits();
     CPU_STEP_Count = 0;
     wxString mystring(filename);
-    UnmanagedWrapper::VANGUARD_LOADSTATE(mystring);
-    return stateLoading->WaitOne(10000);
+    stateLoading = true;
+    UnmanagedWrapper::VANGUARD_LOADSTATE(mystring); 
+    // We have to do it this way to prevent deadlock due to synced calls. It sucks but it's required at the moment
+    int i = 0;
+    do {
+        Thread::Sleep(20);
+        System::Windows::Forms::Application::DoEvents();
+
+        //We wait for 20 ms every time. If loading a game takes longer than 10 seconds, break out.
+        if (++i > 500){
+            stateLoading = false;
+            return false;
+        }
+    } while (stateLoading);
+    return true;
 }
 
 bool VanguardClient::SaveState(String ^ filename)
