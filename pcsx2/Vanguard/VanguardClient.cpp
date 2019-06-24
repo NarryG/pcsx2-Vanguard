@@ -270,7 +270,7 @@ static array<MemoryDomainProxy ^> ^ GetInterfaces() {
         LocalNetCoreRouter::Route(NetcoreCommands::CORRUPTCORE, NetcoreCommands::REMOTE_EVENT_DOMAINSUPDATED, domainsChanged, true);
     }
 
-    return true;
+    return domainsChanged;
 }
 
 #pragma endregion
