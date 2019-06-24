@@ -251,27 +251,36 @@ static array<MemoryDomainProxy ^> ^ GetInterfaces() {
 
     static bool RefreshDomains(bool updateSpecs = true)
 {
-    array<MemoryDomainProxy ^> ^ oldInterfaces = AllSpec::VanguardSpec->Get<array<MemoryDomainProxy ^> ^>(VSPEC::MEMORYDOMAINS_INTERFACES);
+    array<MemoryDomainProxy ^> ^ oldInterfaces =
+        AllSpec::VanguardSpec->Get<array<MemoryDomainProxy ^> ^>(VSPEC::MEMORYDOMAINS_INTERFACES);
     array<MemoryDomainProxy ^> ^ newInterfaces = GetInterfaces();
 
-    // Bruteforce it since domains can change inconsistently in some configs and we keep code consistent between implementations
-    bool domainsChanged = oldInterfaces->Length != newInterfaces->Length;
-    for (int i = 0; i < oldInterfaces->Length; i++) {
-        if (domainsChanged)
-            break;
-        if (oldInterfaces[i]->Name != newInterfaces[i]->Name)
-            domainsChanged = true;
-        if (oldInterfaces[i]->Size != newInterfaces[i]->Size)
-            domainsChanged = true;
+    // Bruteforce it since domains can change inconsistently in some configs and we keep code
+    // consistent between implementations
+    bool domainsChanged = false;
+    if (oldInterfaces == nullptr)
+        domainsChanged = true;
+    else {
+        domainsChanged = oldInterfaces->Length != newInterfaces->Length;
+        for (int i = 0; i < oldInterfaces->Length; i++) {
+            if (domainsChanged)
+                break;
+            if (oldInterfaces[i]->Name != newInterfaces[i]->Name)
+                domainsChanged = true;
+            if (oldInterfaces[i]->Size != newInterfaces[i]->Size)
+                domainsChanged = true;
+        }
     }
 
     if (updateSpecs) {
         AllSpec::VanguardSpec->Update(VSPEC::MEMORYDOMAINS_INTERFACES, newInterfaces, true, true);
-        LocalNetCoreRouter::Route(NetcoreCommands::CORRUPTCORE, NetcoreCommands::REMOTE_EVENT_DOMAINSUPDATED, domainsChanged, true);
+        LocalNetCoreRouter::Route(NetcoreCommands::CORRUPTCORE,
+                                  NetcoreCommands::REMOTE_EVENT_DOMAINSUPDATED, domainsChanged, true);
     }
 
     return domainsChanged;
 }
+
 
 #pragma endregion
 
@@ -333,7 +342,6 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
         gameDone->Set(VSPEC::SYSTEMCORE, "PS2");
         gameDone->Set(VSPEC::SYNCSETTINGS, "");
         gameDone->Set(VSPEC::MEMORYDOMAINS_BLACKLISTEDDOMAINS, gcnew array<String ^>{});
-        gameDone->Set(VSPEC::MEMORYDOMAINS_INTERFACES, GetInterfaces());
         gameDone->Set(VSPEC::CORE_DISKBASED, true);
 
         String ^ oldGame = AllSpec::VanguardSpec->Get<String ^>(VSPEC::GAMENAME);
@@ -350,10 +358,7 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
 
         AllSpec::VanguardSpec->Update(gameDone, true, false);
 
-        bool domainsChanged = RefreshDomains(false);
-        // This is local. If the domains changed it propgates over netcore
-        LocalNetCoreRouter::Route(NetcoreCommands::CORRUPTCORE, NetcoreCommands::REMOTE_EVENT_DOMAINSUPDATED, domainsChanged, true);
-
+        bool domainsChanged = RefreshDomains(true);
         if (oldGame != gameName) {
             LocalNetCoreRouter::Route(NetcoreCommands::UI, NetcoreCommands::RESET_GAME_PROTECTION_IF_RUNNING, true);
         }
