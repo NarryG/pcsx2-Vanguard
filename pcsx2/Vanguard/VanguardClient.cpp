@@ -542,7 +542,7 @@ void VanguardClient::OnMessageReceived(Object ^ sender, NetCoreEventArgs ^ e)
 
             // Load up the sync settings //Todo
             String ^ settingStr = AllSpec::VanguardSpec->Get<String ^>(VSPEC::SYNCSETTINGS);
-            if (settingStr != nullptr) {
+            if (!String::IsNullOrWhiteSpace(settingStr)) {
                 std::string ss = Helpers::systemStringToUtf8String(settingStr);
                 UnmanagedWrapper::VANGUARD_LOADCONFIG(wxString(ss));
             }
