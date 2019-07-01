@@ -503,7 +503,8 @@ void StopGame() //Todo
 
 void Quit()
 {
-    UnmanagedWrapper::VANGUARD_EXIT();
+    Environment::Exit(-1);
+    //UnmanagedWrapper::VANGUARD_EXIT();
 }
 
 void AllSpecsSent()
@@ -611,10 +612,11 @@ void VanguardClient::OnMessageReceived(Object ^ sender, NetCoreEventArgs ^ e)
 
         case REMOTE_EVENT_EMU_MAINFORM_CLOSE:
         case REMOTE_EVENT_CLOSEEMULATOR: {
-            SyncObjectSingleton::GenericDelegate ^ g =
-                gcnew SyncObjectSingleton::GenericDelegate(&StopGame);
+            SyncObjectSingleton::GenericDelegate ^ g = gcnew SyncObjectSingleton::GenericDelegate(&StopGame);
             SyncObjectSingleton::FormExecute(g);
+            Thread::Sleep(50);
             StopClient();
+            Thread::Sleep(50);
             g = gcnew SyncObjectSingleton::GenericDelegate(&Quit);
             SyncObjectSingleton::FormExecute(g);
         } break;
