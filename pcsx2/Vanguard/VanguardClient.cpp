@@ -76,6 +76,7 @@ public:
     static volatile bool gameLoading = false;
     static volatile bool stateLoading = false;
     static bool attached = false;
+    static bool enableRTC = true;
 };
 
 
@@ -220,6 +221,9 @@ void VanguardClient::StartClient()
         if (args[i] == "-ATTACHED") {
             attached = true;
         }
+        if (args[i] == "-DISABLERTC") {
+            enableRTC = false;
+        }
     }
 
     receiver = gcnew NetCoreReceiver();
@@ -317,6 +321,8 @@ static void STEP_CORRUPT() // errors trapped by CPU_STEP
 #pragma region Hooks
 void VanguardClientUnmanaged::CORE_STEP()
 {
+    if (!VanguardClient::enableRTC)
+        return;
     // Any step hook for corruption
     ActionDistributor::Execute("ACTION");
     STEP_CORRUPT();
@@ -325,6 +331,8 @@ void VanguardClientUnmanaged::CORE_STEP()
 // This is on the main thread not the emu thread
 void VanguardClientUnmanaged::LOAD_GAME_START(std::string romPath)
 {
+    if (!VanguardClient::enableRTC)
+        return;
     StepActions::ClearStepBlastUnits();
     CPU_STEP_Count = 0;
 
@@ -334,6 +342,8 @@ void VanguardClientUnmanaged::LOAD_GAME_START(std::string romPath)
 
 void VanguardClientUnmanaged::LOAD_GAME_DONE()
 {
+    if (!VanguardClient::enableRTC)
+        return;
     PartialSpec ^ gameDone = gcnew PartialSpec("VanguardSpec");
 
     try {
@@ -370,11 +380,15 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
 
 void VanguardClientUnmanaged::LOAD_STATE_DONE()
 {
+    if (!VanguardClient::enableRTC)
+        return;
     VanguardClient::stateLoading = false;
 }
 
 void VanguardClientUnmanaged::GAME_CLOSED()
 {
+    if (!VanguardClient::enableRTC)
+        return;
     AllSpec::VanguardSpec->Update(VSPEC::OPENROMFILENAME, "", true, false);
 }
 #pragma endregion
@@ -516,6 +530,9 @@ void AllSpecsSent()
 /* THIS IS WHERE YOU HANDLE ANY RECEIVED MESSAGES */
 void VanguardClient::OnMessageReceived(Object ^ sender, NetCoreEventArgs ^ e)
 {
+    if (!VanguardClient::enableRTC)
+        return;
+
     NetCoreMessage ^ message = e->message;
     NetCoreSimpleMessage ^ simpleMessage;
     NetCoreAdvancedMessage ^ advancedMessage;
