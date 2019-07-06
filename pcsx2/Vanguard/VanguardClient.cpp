@@ -391,6 +391,16 @@ void VanguardClientUnmanaged::GAME_CLOSED()
         return;
     AllSpec::VanguardSpec->Update(VSPEC::OPENROMFILENAME, "", true, false);
 }
+
+
+bool VanguardClientUnmanaged::RTC_OSD_ENABLED()
+{
+    if (!VanguardClient::enableRTC)
+        return true;
+    if (RTCV::NetCore::Params::IsParamSet(RTCSPEC::CORE_EMULATOROSDDISABLED))
+        return false;
+    return true;
+}
 #pragma endregion
 
 /*ENUMS FOR THE SWITCH STATEMENT*/
