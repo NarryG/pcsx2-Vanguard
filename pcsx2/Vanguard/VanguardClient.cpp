@@ -100,6 +100,7 @@ static PartialSpec ^ getDefaultPartial() {
     partial->Set(VSPEC::MEMORYDOMAINS_BLACKLISTEDDOMAINS, gcnew array<String ^>{});
     partial->Set(VSPEC::LOADSTATE_USES_CALLBACKS, true);
     partial->Set(VSPEC::SYSTEM, String::Empty);
+    partial->Set(VSPEC::EMUDIR, VanguardClient::emuDir);
 
     return partial;
 }
@@ -533,7 +534,6 @@ void Quit()
 
 void AllSpecsSent()
 {
-    AllSpec::VanguardSpec->Update(VSPEC::EMUDIR, VanguardClient::emuDir, true, true);
 }
 #pragma endregion
 
