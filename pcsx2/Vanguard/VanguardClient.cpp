@@ -174,9 +174,14 @@ static Assembly ^ CurrentDomain_AssemblyResolve(Object ^ sender, ResolveEventArg
     }
 }
 
-    // Create our VanguardClient
-    void VanguardClientInitializer::StartVanguardClient()
+// Create our VanguardClient
+void VanguardClientInitializer::StartVanguardClient()
 {
+
+    // this needs to be done before the warnings/errors show up
+    System::Windows::Forms::Application::EnableVisualStyles();
+    System::Windows::Forms::Application::SetCompatibleTextRenderingDefault(false);
+
     System::Windows::Forms::Form ^ dummy = gcnew System::Windows::Forms::Form();
     IntPtr Handle = dummy->Handle;
     SyncObjectSingleton::SyncObject = dummy;
@@ -248,6 +253,9 @@ void VanguardClient::StopClient()
 
 #pragma region MemoryDomains
 static array<MemoryDomainProxy ^> ^ GetInterfaces() {
+    if (String::IsNullOrWhiteSpace(AllSpec::VanguardSpec->Get<String ^>(VSPEC::OPENROMFILENAME)))
+        return gcnew array<MemoryDomainProxy ^>(0);
+
     array<MemoryDomainProxy ^> ^ interfaces = gcnew array<MemoryDomainProxy ^>(1);
     interfaces[0] = gcnew MemoryDomainProxy(gcnew EERAM);
 
@@ -377,6 +385,7 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
         Trace::WriteLine(e->ToString());
     }
     VanguardClient::gameLoading = false;
+    RtcCore::LOAD_GAME_DONE();
 }
 
 void VanguardClientUnmanaged::LOAD_STATE_DONE()
@@ -391,6 +400,8 @@ void VanguardClientUnmanaged::GAME_CLOSED()
     if (!VanguardClient::enableRTC)
         return;
     AllSpec::VanguardSpec->Update(VSPEC::OPENROMFILENAME, "", true, false);
+    RefreshDomains();
+    RtcCore::GAME_CLOSED();
 }
 
 

@@ -32,7 +32,6 @@
 #include "Patch.h"
 #include "R5900Exceptions.h"
 #include "Sio.h"
-#include "Vanguard/VanguardClientInitializer.h"
 
 __aligned16 SysMtgsThread mtgsThread;
 __aligned16 AppCoreThread CoreThread;
@@ -114,7 +113,6 @@ void AppCoreThread::Reset()
 		GetSysExecutorThread().PostEvent( SysExecEvent_InvokeCoreThreadMethod(&AppCoreThread::Reset) );
 		return;
 	}
-
 	_parent::Reset();
 }
 

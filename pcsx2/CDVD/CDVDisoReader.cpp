@@ -39,7 +39,6 @@ static bool layer1searched = false;
 void CALLBACK ISOclose()
 {
     iso.Close();
-    VanguardClientUnmanaged::GAME_CLOSED();
 }
 
 s32 CALLBACK ISOopen(const char* pTitle)

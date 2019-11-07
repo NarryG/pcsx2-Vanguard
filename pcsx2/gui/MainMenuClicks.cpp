@@ -30,6 +30,7 @@
 #include "Debugger/DisassemblyDialog.h"
 
 #include "Utilities/IniInterface.h"
+#include "Vanguard/VanguardClient.h"
 
 #ifndef DISABLE_RECORDING
 #	include "Recording/InputRecording.h"
@@ -653,6 +654,8 @@ void MainEmuFrame::Menu_SysShutdown_Click(wxCommandEvent &event)
 	UI_DisableSysShutdown();
 	Console.SetTitle("PCSX2 Program Log");
 	CoreThread.Reset();
+
+    VanguardClientUnmanaged::GAME_CLOSED();
 }
 
 void MainEmuFrame::Menu_ConfigPlugin_Click(wxCommandEvent &event)
