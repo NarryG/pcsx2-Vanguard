@@ -401,7 +401,7 @@ void VanguardClientUnmanaged::GAME_CLOSED()
         return;
     AllSpec::VanguardSpec->Update(VSPEC::OPENROMFILENAME, "", true, false);
     RefreshDomains();
-    RtcCore::GAME_CLOSED();
+    RtcCore::GAME_CLOSED(true);
 }
 
 
