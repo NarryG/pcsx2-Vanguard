@@ -217,13 +217,11 @@ void VanguardClientInitializer::Initialize()
 
 void VanguardClient::StartClient()
 {
-    NetCore_Extensions::ConsoleHelper::CreateConsole(logPath);
-    NetCore_Extensions::ConsoleHelper::HideConsole();
+    RTCV::Common::Logging::StartLogging(logPath);
     // Can't use contains
     auto args = Environment::GetCommandLineArgs();
     for (int i = 0; i < args->Length; i++) {
         if (args[i] == "-CONSOLE") {
-            NetCore_Extensions::ConsoleHelper::ShowConsole();
         }
         if (args[i] == "-ATTACHED") {
             attached = true;

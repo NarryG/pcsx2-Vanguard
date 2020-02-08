@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.645
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29721.120
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nulls", "Nulls", "{E1828E40-2FBB-48FE-AE7F-5587755DCE0E}"
 EndProject
@@ -34,37 +34,37 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "wx", "wx", "{62BF822E-6A12-
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{2D6F0A62-A247-4CCF-947F-FCD54BE16103}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pcsx2", "pcsx2\windows\VCprojects\pcsx2.vcxproj", "{1CEFD830-2B76-4596-A4EE-BCD7280A60BD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pcsx2", "pcsx2\WINDOWS\VCprojects\pcsx2.vcxproj", "{1CEFD830-2B76-4596-A4EE-BCD7280A60BD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Spu2-X", "plugins\spu2-x\src\Windows\Spu2-X.vcxproj", "{5307BBB7-EBB9-4AA4-8CB6-A94EC473C8C4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Spu2-X", "Plugins\spu2-x\src\WINDOWS\Spu2-X.vcxproj", "{5307BBB7-EBB9-4AA4-8CB6-A94EC473C8C4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GSdx", "plugins\GSdx\GSdx.vcxproj", "{18E42F6F-3A62-41EE-B42F-79366C4F1E95}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GSdx", "Plugins\GSdx\GSdx.vcxproj", "{18E42F6F-3A62-41EE-B42F-79366C4F1E95}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SoundTouch", "3rdparty\soundtouch\SoundTouch.vcxproj", "{E9B51944-7E6D-4BCD-83F2-7BBD5A46182D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "3rdparty\zlib\zlib.vcxproj", "{2F6C0388-20CB-4242-9F6C-A6EBB6A83F47}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LilyPad", "plugins\LilyPad\LilyPad.vcxproj", "{E4081455-398C-4610-A87C-90A8A7D72DC3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LilyPad", "Plugins\LilyPad\LilyPad.vcxproj", "{E4081455-398C-4610-A87C-90A8A7D72DC3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "USBnull", "plugins\USBnull\Windows\USBnull.vcxproj", "{BF7B81A5-E348-4F7C-A69F-F74C8EEEAD70}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "USBnull", "Plugins\USBnull\WINDOWS\USBnull.vcxproj", "{BF7B81A5-E348-4F7C-A69F-F74C8EEEAD70}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FWnull", "plugins\FWnull\Windows\FWnull.vcxproj", "{3D0EB14D-32F3-4D82-9C6D-B806ADBB859C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FWnull", "Plugins\FWnull\WINDOWS\FWnull.vcxproj", "{3D0EB14D-32F3-4D82-9C6D-B806ADBB859C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DEV9null", "plugins\dev9null\Windows\DEV9null.vcxproj", "{04439C5F-05FB-4A9C-AAD1-5388C25377DB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DEV9null", "Plugins\dev9null\WINDOWS\DEV9null.vcxproj", "{04439C5F-05FB-4A9C-AAD1-5388C25377DB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "x86emitter", "common\build\x86emitter\x86emitter.vcxproj", "{A51123F5-9505-4EAE-85E7-D320290A272C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utilities", "common\build\Utilities\utilities.vcxproj", "{4639972E-424E-4E13-8B07-CA403C481346}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bin2cpp", "tools\bin2cpp\bin2c.vcxproj", "{677B7D11-D5E1-40B3-88B1-9A4DF83D2213}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bin2cpp", "Tools\bin2cpp\bin2c.vcxproj", "{677B7D11-D5E1-40B3-88B1-9A4DF83D2213}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libjpeg", "3rdparty\libjpeg\libjpeg.vcxproj", "{BC236261-77E8-4567-8D09-45CD02965EB6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cdvdGigaherz", "plugins\cdvdGigaherz\src\Windows\cdvdGigaherz.vcxproj", "{5CF88D5F-64DD-4EDC-9F1A-436BD502940A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cdvdGigaherz", "Plugins\cdvdGigaherz\src\WINDOWS\cdvdGigaherz.vcxproj", "{5CF88D5F-64DD-4EDC-9F1A-436BD502940A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "3rdparty\portaudio\build\msvc\portaudio.vcxproj", "{0A18A071-125E-442F-AFF7-A3F68ABECF99}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DEV9ghzdrk", "plugins\dev9ghzdrk\Win32\DEV9ghzdrk.vcxproj", "{BBE4E5FB-530A-4D18-A633-35AF0577B7F3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DEV9ghzdrk", "Plugins\dev9ghzdrk\win32\DEV9ghzdrk.vcxproj", "{BBE4E5FB-530A-4D18-A633-35AF0577B7F3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Experimental", "Experimental", "{7A407562-D70F-4F0A-9D3E-B32506416003}"
 EndProject
@@ -93,6 +93,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCore", "..\RTCV\Source\Libraries\NetCore\NetCore.csproj", "{7E106AEC-5614-4206-9E4D-25759C90E8AE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vanguard", "..\RTCV\Source\Libraries\Vanguard\Vanguard.csproj", "{364C705E-B7AB-4A94-A59B-88899CE65958}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "..\RTCV\Source\Libraries\common\Common.csproj", "{A31C17E1-2EAB-434F-A022-20193F2CEAB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -915,6 +917,36 @@ Global
 		{364C705E-B7AB-4A94-A59B-88899CE65958}.Release|Win32.Build.0 = Release|x86
 		{364C705E-B7AB-4A94-A59B-88899CE65958}.Release|x64.ActiveCfg = Release|x64
 		{364C705E-B7AB-4A94-A59B-88899CE65958}.Release|x64.Build.0 = Release|x64
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Debug|Win32.Build.0 = Debug|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Debug|x64.Build.0 = Debug|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Devel|Any CPU.ActiveCfg = Debug|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Devel|Any CPU.Build.0 = Debug|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Devel|Win32.ActiveCfg = Debug|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Devel|Win32.Build.0 = Debug|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Devel|x64.ActiveCfg = Debug|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Devel|x64.Build.0 = Debug|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release AVX2|Any CPU.ActiveCfg = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release AVX2|Any CPU.Build.0 = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release AVX2|Win32.ActiveCfg = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release AVX2|Win32.Build.0 = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release AVX2|x64.ActiveCfg = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release AVX2|x64.Build.0 = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release SSE4|Any CPU.ActiveCfg = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release SSE4|Any CPU.Build.0 = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release SSE4|Win32.ActiveCfg = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release SSE4|Win32.Build.0 = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release SSE4|x64.ActiveCfg = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release SSE4|x64.Build.0 = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release|Win32.ActiveCfg = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release|Win32.Build.0 = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release|x64.ActiveCfg = Release|Any CPU
+		{A31C17E1-2EAB-434F-A022-20193F2CEAB7}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
