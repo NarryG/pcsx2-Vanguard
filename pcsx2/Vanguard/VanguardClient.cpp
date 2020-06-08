@@ -43,7 +43,6 @@ using namespace Diagnostics;
 #using < system.dll >
 #using < system.windows.forms.dll >
 
-static int CPU_STEP_Count = 0;
 
 // Define this in here as it's managed and weird stuff happens if it's in a header
 public
@@ -312,18 +311,7 @@ VanguardSettingsWrapper ^ VanguardClient::GetConfigFromJson(String ^ str)
 #pragma endregion
 static void STEP_CORRUPT() // errors trapped by CPU_STEP
 {
-    StepActions::Execute();
-    CPU_STEP_Count++;
-    bool autoCorrupt = RtcCore::AutoCorrupt;
-    long errorDelay = RtcCore::ErrorDelay;
-    if (autoCorrupt && CPU_STEP_Count >= errorDelay) {
-        CPU_STEP_Count = 0;
-        array<String ^> ^ domains = AllSpec::UISpec->Get<array<String ^> ^>("SELECTEDDOMAINS");
-
-        BlastLayer ^ bl = RtcCore::GenerateBlastLayer(domains, -1);
-        if (bl != nullptr)
-            bl->Apply(false, true);
-    }
+    RtcClock::STEP_CORRUPT(true, true);
 }
 
 #pragma region Hooks
@@ -342,7 +330,8 @@ void VanguardClientUnmanaged::LOAD_GAME_START(std::string romPath)
     if (!VanguardClient::enableRTC)
         return;
     StepActions::ClearStepBlastUnits();
-    CPU_STEP_Count = 0;
+
+    RtcClock::RESET_COUNT();
 
     String ^ gameName = Helpers::utf8StringToSystemString(romPath);
     AllSpec::VanguardSpec->Update(VSPEC::OPENROMFILENAME, gameName, true, true);
@@ -500,7 +489,7 @@ void VanguardClient::LoadRom(String ^ filename)
 bool VanguardClient::LoadState(std::string filename)
 {
     StepActions::ClearStepBlastUnits();
-    CPU_STEP_Count = 0;
+    RtcClock::RESET_COUNT();
     wxString mystring(filename);
     stateLoading = true;
     UnmanagedWrapper::VANGUARD_LOADSTATE(mystring); 
