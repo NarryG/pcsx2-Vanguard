@@ -64,7 +64,7 @@ if(CMAKE_CROSSCOMPILING)
     endif()
 else()
     if (${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
-        set(wxWidgets_CONFIG_EXECUTABLE "/usr/local/bin/wxgtk2u-3.0-config")
+        set(wxWidgets_CONFIG_EXECUTABLE "/usr/local/bin/wxgtk3u-3.0-config")
     endif()
     if(EXISTS "/usr/bin/wx-config-3.0")
         set(wxWidgets_CONFIG_EXECUTABLE "/usr/bin/wx-config-3.0")
@@ -105,7 +105,9 @@ endif()
 if(OPENCL_API)
     check_lib(OPENCL OpenCL CL/cl.hpp)
 endif()
-check_lib(PORTAUDIO portaudio portaudio.h pa_linux_alsa.h)
+if(PORTAUDIO_API)
+    check_lib(PORTAUDIO portaudio portaudio.h pa_linux_alsa.h)
+endif()
 check_lib(SOUNDTOUCH SoundTouch soundtouch/SoundTouch.h)
 
 if(SDL2_API)
@@ -191,6 +193,12 @@ if(ZLIB_FOUND)
 	include_directories(${ZLIB_INCLUDE_DIRS})
 endif()
 
+find_package(HarfBuzz)
+
+if(HarfBuzz_FOUND)
+include_directories(${HarfBuzz_INCLUDE_DIRS})
+endif()
+
 #----------------------------------------
 #  Use  project-wide include directories
 #----------------------------------------
@@ -212,4 +220,13 @@ WX_vs_SDL()
 # Blacklist bad GCC
 if(GCC_VERSION VERSION_EQUAL "7.0" OR GCC_VERSION VERSION_EQUAL "7.1")
     GCC7_BUG()
+endif()
+
+if((GCC_VERSION VERSION_EQUAL "9.0" OR GCC_VERSION VERSION_GREATER "9.0") AND GCC_VERSION LESS "9.2")
+    message(WARNING "
+    It looks like you are compiling with 9.0.x or 9.1.x. Using these versions is not recommended,
+    as there is a bug known to cause the compiler to segfault while compiling. See patch
+    https://gitweb.gentoo.org/proj/gcc-patches.git/commit/?id=275ab714637a64672c6630cfd744af2c70957d5a
+    Even with that patch, compiling with LTO may still segfault. Use at your own risk!
+    This text being in a compile log in an open issue may cause it to be closed.")
 endif()

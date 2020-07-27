@@ -524,8 +524,9 @@ double FramerateManager::GetFramerate() const
 // times a second if not (ok, not quite, but you get the idea... I hope.)
 extern uint eecount_on_last_vdec;
 extern bool FMVstarted;
-extern bool renderswitch;
 extern bool EnableFMV;
+extern bool renderswitch;
+extern uint renderswitch_delay;
 
 void DoFmvSwitch(bool on)
 {
@@ -550,48 +551,48 @@ void DoFmvSwitch(bool on)
 
 void Pcsx2App::LogicalVsync()
 {
-    if (AppRpc_TryInvokeAsync(&Pcsx2App::LogicalVsync))
-        return;
+	if( AppRpc_TryInvokeAsync( &Pcsx2App::LogicalVsync ) ) return;
 
-    if (!SysHasValidState())
-        return;
+	if( !SysHasValidState() ) return;
 
-    // Update / Calculate framerate!
+	// Update / Calculate framerate!
 
-    FpsManager.DoFrame();
+	FpsManager.DoFrame();
 
-    if (EmuConfig.Gamefixes.FMVinSoftwareHack || g_Conf->GSWindow.FMVAspectRatioSwitch != FMV_AspectRatio_Switch_Off) {
-        if (EnableFMV) {
-            DevCon.Warning("FMV on");
-            DoFmvSwitch(true);
-            EnableFMV = false;
-        }
+	if (EmuConfig.Gamefixes.FMVinSoftwareHack || g_Conf->GSWindow.FMVAspectRatioSwitch != FMV_AspectRatio_Switch_Off) {
+		if (EnableFMV) {
+			DevCon.Warning("FMV on");
+			DoFmvSwitch(true);
+			EnableFMV = false;
+		}
 
-        if (FMVstarted) {
-            int diff = cpuRegs.cycle - eecount_on_last_vdec;
-            if (diff > 60000000) {
-                DevCon.Warning("FMV off");
-                DoFmvSwitch(false);
-                FMVstarted = false;
-            }
-        }
-    }
+		if (FMVstarted) {
+			int diff = cpuRegs.cycle - eecount_on_last_vdec;
+			if (diff > 60000000 ) {
+				DevCon.Warning("FMV off");
+				DoFmvSwitch(false);
+				FMVstarted = false;
+			}
+		}
+	}
 
-    // Only call PADupdate here if we're using GSopen2.  Legacy GSopen plugins have the
-    // GS window belonging to the MTGS thread.
-    if ((PADupdate != NULL) && (GSopen2 != NULL) && (wxGetApp().GetGsFramePtr() != NULL))
-        PADupdate(0);
+	renderswitch_delay >>= 1;
 
-    while (const keyEvent *ev = PADkeyEvent()) {
-        if (ev->key == 0)
-            break;
+	// Only call PADupdate here if we're using GSopen2.  Legacy GSopen plugins have the
+	// GS window belonging to the MTGS thread.
+	if( (PADupdate != NULL) && (GSopen2 != NULL) && (wxGetApp().GetGsFramePtr() != NULL) )
+		PADupdate(0);
 
-        // Give plugins first try to handle keys.  If none of them handles the key, it will
-        // be passed to the main user interface.
+	while( const keyEvent* ev = PADkeyEvent() )
+	{
+		if( ev->key == 0 ) break;
 
-        if (!GetCorePlugins().KeyEvent(*ev))
-            PadKeyDispatch(*ev);
-    }
+		// Give plugins first try to handle keys.  If none of them handles the key, it will
+		// be passed to the main user interface.
+
+		if( !GetCorePlugins().KeyEvent( *ev ) )
+			PadKeyDispatch( *ev );
+	}
 }
 
 void Pcsx2App::OnEmuKeyDown(wxKeyEvent &evt)
@@ -621,20 +622,23 @@ void Pcsx2App::HandleEvent(wxEvtHandler *handler, wxEventFunction func, wxEvent 
 {
     try {
 #ifndef DISABLE_RECORDING
-        if (g_Conf->EmuOptions.EnableRecordingTools) {
-            if (g_RecordingControls.HasRecordingStopped()) {
-                // While stopping, GSFrame key event also stops, so get key input from here
-                // Along with that, you can not use the shortcut keys set in GSFrame
-                if (PADkeyEvent != NULL) {
-                    // Acquire key information, possibly calling it only once per frame
-                    const keyEvent *ev = PADkeyEvent();
-                    if (ev != NULL) {
-                        sApp.Recording_PadKeyDispatch(*ev);
-                    }
-                }
-            }
-            g_RecordingControls.ResumeCoreThreadIfStarted();
-        }
+		if (g_Conf->EmuOptions.EnableRecordingTools)
+		{
+			if (g_RecordingControls.IsEmulationAndRecordingPaused())
+			{
+				// When the GSFrame CoreThread is paused, so is the logical VSync
+				// Meaning that we have to grab the user-input through here to potentially
+				// resume emulation.
+				if (const keyEvent* ev = PADkeyEvent() )
+				{
+					if( ev->key != 0 )
+					{
+						PadKeyDispatch( *ev );
+					}
+				}
+			}
+			g_RecordingControls.ResumeCoreThreadIfStarted();
+		}
 #endif
         (handler->*func)(event);
     }

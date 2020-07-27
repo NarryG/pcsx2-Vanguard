@@ -20,6 +20,10 @@
  */
 
 #pragma once
+#ifdef __clang__
+// Ignore format for this file, as it spams a lot of warnings about uint64 and %llu.
+#pragma clang diagnostic ignored "-Wformat"
+#endif
 
 #include "GS.h"
 #include "GSLocalMemory.h"
@@ -146,8 +150,8 @@ public:
 		return ZBUF.ZMSK == 0 && TEST.ZTE != 0; // ZTE == 0 is bug on the real hardware, write is blocked then
 	}
 
-	GIFRegTEX0 GetSizeFixedTEX0(int s_n, const GSVector4& st, bool linear, bool mipmap = false);
-	void ComputeFixedTEX0(const GSVector4& st, bool linear);
+	GIFRegTEX0 GetSizeFixedTEX0(const GSVector4& st, bool linear, bool mipmap = false);
+	void ComputeFixedTEX0(const GSVector4& st);
 	bool HasFixedTEX0() const { return m_fixed_tex0;}
 
 	// Save & Restore before/after draw allow to correct/optimize current register for current draw

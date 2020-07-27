@@ -317,7 +317,7 @@ s32 CALLBACK ISOreadSector(u8* tempbuffer, u32 lsn, int mode)
 	int _lsn = lsn;
 
 	if (_lsn < 0) lsn = iso.GetBlockCount() + _lsn;
-	if (lsn > iso.GetBlockCount()) return -1;
+	if (lsn >= iso.GetBlockCount()) return -1;
 
 	if(mode == CDVD_MODE_2352)
 	{
@@ -364,7 +364,6 @@ s32 CALLBACK ISOreadTrack(u32 lsn, int mode)
 	int _lsn = lsn;
 
 	if (_lsn < 0) lsn = iso.GetBlockCount() + _lsn;
-	if (lsn > iso.GetBlockCount()) return -1;
 
 	iso.BeginRead2(lsn);
 

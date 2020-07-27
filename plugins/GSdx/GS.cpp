@@ -45,9 +45,6 @@ static HRESULT s_hr = E_FAIL;
 #include "Window/GSWndOGL.h"
 #include "Window/GSWndEGL.h"
 
-#include <gtk/gtk.h>
-#include <gdk/gdkx.h>
-
 extern bool RunLinuxDialog();
 
 #endif
@@ -79,7 +76,7 @@ EXPORT_C_(const char*) PS2EgetLibName()
 EXPORT_C_(uint32) PS2EgetLibVersion2(uint32 type)
 {
 	const uint32 revision = 1;
-	const uint32 build = 1;
+	const uint32 build = 2;
 
 	return (build << 0) | (revision << 8) | (PS2E_GS_VERSION << 16) | (PLUGIN_VERSION << 24);
 }
@@ -148,13 +145,7 @@ EXPORT_C_(int) GSinit()
 		g_const->Init();
 
 #ifdef _WIN32
-
 	s_hr = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
-
-	if (!GSDevice11::LoadD3DCompiler())
-	{
-		return -1;
-	}
 #endif
 
 	return 0;
@@ -170,16 +161,12 @@ EXPORT_C GSshutdown()
 	theApp.SetCurrentRendererType(GSRendererType::Undefined);
 
 #ifdef _WIN32
-
 	if(SUCCEEDED(s_hr))
 	{
 		::CoUninitialize();
 
 		s_hr = E_FAIL;
 	}
-
-	GSDevice11::FreeD3DCompiler();
-
 #endif
 }
 
@@ -825,34 +812,7 @@ EXPORT_C GSconfigure()
 EXPORT_C_(int) GStest()
 {
 	if(!GSUtil::CheckSSE())
-	{
 		return -1;
-	}
-
-#ifdef _WIN32
-
-	s_hr = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
-
-	if(!GSUtil::CheckDirectX())
-	{
-		if(SUCCEEDED(s_hr))
-		{
-			::CoUninitialize();
-		}
-
-		s_hr = E_FAIL;
-
-		return -1;
-	}
-
-	if(SUCCEEDED(s_hr))
-	{
-		::CoUninitialize();
-	}
-
-	s_hr = E_FAIL;
-
-#endif
 
 	return 0;
 }
