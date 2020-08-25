@@ -31,6 +31,7 @@ using namespace cli;
 using namespace System;
 using namespace Text;
 using namespace RTCV;
+using namespace RTCV::CorruptCore::Extensions;
 using namespace NetCore;
 using namespace CorruptCore;
 using namespace Vanguard;
@@ -356,10 +357,10 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
         String ^ gameName = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_GETGAMENAME());
 
         char replaceChar = L'-';
-        gameDone->Set(VSPEC::GAMENAME, CorruptCore_Extensions::MakeSafeFilename(gameName, replaceChar));
+        gameDone->Set(VSPEC::GAMENAME, StringExtensions::MakeSafeFilename(gameName, replaceChar));
 
 
-        
+
         String ^ syncsettings = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_SAVECONFIG());
         gameDone->Set(VSPEC::SYNCSETTINGS, syncsettings);
 
@@ -492,7 +493,7 @@ bool VanguardClient::LoadState(std::string filename)
     RtcClock::RESET_COUNT();
     wxString mystring(filename);
     stateLoading = true;
-    UnmanagedWrapper::VANGUARD_LOADSTATE(mystring); 
+    UnmanagedWrapper::VANGUARD_LOADSTATE(mystring);
     // We have to do it this way to prevent deadlock due to synced calls. It sucks but it's required at the moment
     int i = 0;
     do {
@@ -586,7 +587,7 @@ void VanguardClient::OnMessageReceived(Object ^ sender, NetCoreEventArgs ^ e)
             String ^ gameName = Helpers::utf8StringToSystemString(UnmanagedWrapper::VANGUARD_GETGAMENAME());
 
             char replaceChar = L'-';
-            String ^ prefix = CorruptCore_Extensions::MakeSafeFilename(gameName, replaceChar);
+            String ^ prefix = StringExtensions::MakeSafeFilename(gameName, replaceChar);
             prefix = prefix->Substring(prefix->LastIndexOf('\\') + 1);
 
             // Build up our path
