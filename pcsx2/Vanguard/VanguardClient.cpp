@@ -176,14 +176,30 @@ static Assembly ^ CurrentDomain_AssemblyResolve(Object ^ sender, ResolveEventArg
 }
 
 // Create our VanguardClient
-void VanguardClientInitializer::StartVanguardClient()
+void VanguardClientInitializer::Initialize()
 {
+    // This has to be in its own method where no other dlls are used so the JIT can compile it
+    AppDomain::CurrentDomain->AssemblyResolve +=
+        gcnew ResolveEventHandler(CurrentDomain_AssemblyResolve);
+	
+    ConfigureVisualStyles();
+    StartVanguardClient();
+}
 
+//This ensures things render as we want them.
+//There are no issues running this within QT/WXWidgets applications
+//This HAS to be its own method for the JIT. If it's merged with StartVanguardClient(), fun exceptions occur
+void VanguardClientInitializer::ConfigureVisualStyles()
+{
     // this needs to be done before the warnings/errors show up
     System::Windows::Forms::Application::EnableVisualStyles();
     System::Windows::Forms::Application::SetCompatibleTextRenderingDefault(false);
+}
 
-    System::Windows::Forms::Form ^ dummy = gcnew System::Windows::Forms::Form();
+// Create our VanguardClient
+void VanguardClientInitializer::StartVanguardClient()
+{
+    System::Windows::Forms::Form ^dummy = gcnew System::Windows::Forms::Form();
     IntPtr Handle = dummy->Handle;
     SyncObjectSingleton::SyncObject = dummy;
     SyncObjectSingleton::UseQueue = true;
@@ -203,16 +219,6 @@ void VanguardClientInitializer::StartVanguardClient()
     //Lie if we're in attached
     if (VanguardClient::attached)
         VanguardConnector::ImplyClientConnected();
-}
-
-// Create our VanguardClient
-void VanguardClientInitializer::Initialize()
-{
-    // This has to be in its own method where no other dlls are used so the JIT can compile it
-    AppDomain::CurrentDomain->AssemblyResolve +=
-        gcnew ResolveEventHandler(CurrentDomain_AssemblyResolve);
-
-    StartVanguardClient();
 }
 
 void VanguardClient::StartClient()
