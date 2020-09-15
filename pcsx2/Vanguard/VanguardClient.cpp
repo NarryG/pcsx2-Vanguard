@@ -374,7 +374,7 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
         Trace::WriteLine(e->ToString());
     }
     VanguardClient::gameLoading = false;
-    RtcCore::LOAD_GAME_DONE();
+    RtcCore::InvokeLoadGameDone();
 }
 
 void VanguardClientUnmanaged::LOAD_STATE_DONE()
@@ -390,7 +390,7 @@ void VanguardClientUnmanaged::GAME_CLOSED()
         return;
     AllSpec::VanguardSpec->Update(VSPEC::OPENROMFILENAME, "", true, false);
     RefreshDomains();
-    RtcCore::GAME_CLOSED(true);
+    RtcCore::InvokeGameClosed(true);
 }
 
 
