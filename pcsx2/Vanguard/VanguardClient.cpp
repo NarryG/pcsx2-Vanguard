@@ -110,9 +110,9 @@ static PartialSpec ^ getDefaultPartial() {
 {
     PartialSpec ^ partial = e->partialSpec;
 
-    LocalNetCoreRouter::Route(Commands::Basic::CorruptCore,
+    LocalNetCoreRouter::Route(Endpoints::CorruptCore,
                               Commands::Remote::PushVanguardSpecUpdate, partial, true);
-    LocalNetCoreRouter::Route(Commands::Basic::UI, Commands::Remote::PushVanguardSpecUpdate,
+    LocalNetCoreRouter::Route(Endpoints::UI, Commands::Remote::PushVanguardSpecUpdate,
                               partial, true);
 }
 
@@ -129,8 +129,8 @@ void VanguardClient::RegisterVanguardSpec()
     if (attached)
         VanguardConnector::PushVanguardSpecRef(AllSpec::VanguardSpec);
 
-    LocalNetCoreRouter::Route(Commands::Basic::CorruptCore, Commands::Remote::PushVanguardSpec, emuSpecTemplate, true);
-    LocalNetCoreRouter::Route(Commands::Basic::UI, Commands::Remote::PushVanguardSpec, emuSpecTemplate, true);
+    LocalNetCoreRouter::Route(Endpoints::CorruptCore, Commands::Remote::PushVanguardSpec, emuSpecTemplate, true);
+    LocalNetCoreRouter::Route(Endpoints::UI, Commands::Remote::PushVanguardSpec, emuSpecTemplate, true);
     AllSpec::VanguardSpec->SpecUpdated += gcnew EventHandler<SpecUpdateEventArgs ^>(&VanguardClient::SpecUpdated);
 }
 
@@ -292,7 +292,7 @@ static array<MemoryDomainProxy ^> ^ GetInterfaces() {
 
     if (updateSpecs) {
         AllSpec::VanguardSpec->Update(VSPEC::MEMORYDOMAINS_INTERFACES, newInterfaces, true, true);
-        LocalNetCoreRouter::Route(Commands::Basic::CorruptCore,
+        LocalNetCoreRouter::Route(Endpoints::CorruptCore,
                                   Commands::Remote::EventDomainsUpdated, domainsChanged, true);
     }
 
@@ -374,7 +374,7 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
 
         bool domainsChanged = RefreshDomains(true);
         if (oldGame != gameName) {
-            LocalNetCoreRouter::Route(Commands::Basic::UI, Commands::Basic::ResetGameProtectionIfRunning, true);
+            LocalNetCoreRouter::Route(Endpoints::UI, Commands::Basic::ResetGameProtectionIfRunning, true);
         }
     } catch (Exception ^ e) {
         Trace::WriteLine(e->ToString());
