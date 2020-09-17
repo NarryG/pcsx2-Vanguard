@@ -110,9 +110,9 @@ static PartialSpec ^ getDefaultPartial() {
 {
     PartialSpec ^ partial = e->partialSpec;
 
-    LocalNetCoreRouter::Route(NetcoreCommands::CORRUPTCORE,
-                              NetcoreCommands::REMOTE_PUSHVANGUARDSPECUPDATE, partial, true);
-    LocalNetCoreRouter::Route(NetcoreCommands::UI, NetcoreCommands::REMOTE_PUSHVANGUARDSPECUPDATE,
+    LocalNetCoreRouter::Route(Commands::Basic::CorruptCore,
+                              Commands::Remote::PushVanguardSpecUpdate, partial, true);
+    LocalNetCoreRouter::Route(Commands::Basic::UI, Commands::Remote::PushVanguardSpecUpdate,
                               partial, true);
 }
 
@@ -129,8 +129,8 @@ void VanguardClient::RegisterVanguardSpec()
     if (attached)
         VanguardConnector::PushVanguardSpecRef(AllSpec::VanguardSpec);
 
-    LocalNetCoreRouter::Route(NetcoreCommands::CORRUPTCORE, NetcoreCommands::REMOTE_PUSHVANGUARDSPEC, emuSpecTemplate, true);
-    LocalNetCoreRouter::Route(NetcoreCommands::UI, NetcoreCommands::REMOTE_PUSHVANGUARDSPEC, emuSpecTemplate, true);
+    LocalNetCoreRouter::Route(Commands::Basic::CorruptCore, Commands::Remote::PushVanguardSpec, emuSpecTemplate, true);
+    LocalNetCoreRouter::Route(Commands::Basic::UI, Commands::Remote::PushVanguardSpec, emuSpecTemplate, true);
     AllSpec::VanguardSpec->SpecUpdated += gcnew EventHandler<SpecUpdateEventArgs ^>(&VanguardClient::SpecUpdated);
 }
 
@@ -292,8 +292,8 @@ static array<MemoryDomainProxy ^> ^ GetInterfaces() {
 
     if (updateSpecs) {
         AllSpec::VanguardSpec->Update(VSPEC::MEMORYDOMAINS_INTERFACES, newInterfaces, true, true);
-        LocalNetCoreRouter::Route(NetcoreCommands::CORRUPTCORE,
-                                  NetcoreCommands::REMOTE_EVENT_DOMAINSUPDATED, domainsChanged, true);
+        LocalNetCoreRouter::Route(Commands::Basic::CorruptCore,
+                                  Commands::Remote::EventDomainsUpdated, domainsChanged, true);
     }
 
     return domainsChanged;
@@ -318,7 +318,7 @@ VanguardSettingsWrapper ^ VanguardClient::GetConfigFromJson(String ^ str)
 #pragma endregion
 static void STEP_CORRUPT() // errors trapped by CPU_STEP
 {
-    RtcClock::STEP_CORRUPT(true, true);
+    RtcClock::StepCorrupt(true, true);
 }
 
 #pragma region Hooks
@@ -338,7 +338,7 @@ void VanguardClientUnmanaged::LOAD_GAME_START(std::string romPath)
         return;
     StepActions::ClearStepBlastUnits();
 
-    RtcClock::RESET_COUNT();
+    RtcClock::ResetCount();
 
     String ^ gameName = Helpers::utf8StringToSystemString(romPath);
     AllSpec::VanguardSpec->Update(VSPEC::OPENROMFILENAME, gameName, true, true);
@@ -374,13 +374,13 @@ void VanguardClientUnmanaged::LOAD_GAME_DONE()
 
         bool domainsChanged = RefreshDomains(true);
         if (oldGame != gameName) {
-            LocalNetCoreRouter::Route(NetcoreCommands::UI, NetcoreCommands::RESET_GAME_PROTECTION_IF_RUNNING, true);
+            LocalNetCoreRouter::Route(Commands::Basic::UI, Commands::Basic::ResetGameProtectionIfRunning, true);
         }
     } catch (Exception ^ e) {
         Trace::WriteLine(e->ToString());
     }
     VanguardClient::gameLoading = false;
-    RtcCore::LOAD_GAME_DONE();
+    RtcCore::InvokeLoadGameDone();
 }
 
 void VanguardClientUnmanaged::LOAD_STATE_DONE()
@@ -396,7 +396,7 @@ void VanguardClientUnmanaged::GAME_CLOSED()
         return;
     AllSpec::VanguardSpec->Update(VSPEC::OPENROMFILENAME, "", true, false);
     RefreshDomains();
-    RtcCore::GAME_CLOSED(true);
+    RtcCore::InvokeGameClosed(true);
 }
 
 
@@ -496,7 +496,7 @@ void VanguardClient::LoadRom(String ^ filename)
 bool VanguardClient::LoadState(std::string filename)
 {
     StepActions::ClearStepBlastUnits();
-    RtcClock::RESET_COUNT();
+    RtcClock::ResetCount();
     wxString mystring(filename);
     stateLoading = true;
     UnmanagedWrapper::VANGUARD_LOADSTATE(mystring);
