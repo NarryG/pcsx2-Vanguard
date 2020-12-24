@@ -16,10 +16,6 @@ jobs:
         repository: 'redscientistlabs/RTCV'
         ref: '506'
         path: 'RTCV'
-    - name: Setup Nuget
-      uses: nuget/setup-nuget@v1.0.2
-      with:
-        nuget-version: 'latest'
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
     - name: Restore Nuget packages in RTCV
