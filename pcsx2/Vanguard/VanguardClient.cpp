@@ -261,8 +261,13 @@ static array<MemoryDomainProxy ^> ^ GetInterfaces() {
     if (String::IsNullOrWhiteSpace(AllSpec::VanguardSpec->Get<String ^>(VSPEC::OPENROMFILENAME)))
         return gcnew array<MemoryDomainProxy ^>(0);
 
-    array<MemoryDomainProxy ^> ^ interfaces = gcnew array<MemoryDomainProxy ^>(1);
+    array<MemoryDomainProxy ^> ^ interfaces = gcnew array<MemoryDomainProxy ^>(6);
     interfaces[0] = gcnew MemoryDomainProxy(gcnew EERAM);
+    interfaces[1] = gcnew MemoryDomainProxy(gcnew IOPRAM);
+    interfaces[2] = gcnew MemoryDomainProxy(gcnew KernelMemory);
+    interfaces[3] = gcnew MemoryDomainProxy(gcnew Scratchpad);
+    interfaces[4] = gcnew MemoryDomainProxy(gcnew GSRAM);
+    interfaces[5] = gcnew MemoryDomainProxy(gcnew SPU2RAM);
 
     return interfaces;
 }
@@ -336,7 +341,7 @@ void VanguardClientUnmanaged::LOAD_GAME_START(std::string romPath)
 {
     if (!VanguardClient::enableRTC)
         return;
-    StepActions::ClearStepBlastUnits();
+    LocalNetCoreRouter::Route(Endpoints::CorruptCore, Commands::Remote::ClearStepBlastUnits, false);
 
     RtcClock::ResetCount();
 
@@ -430,33 +435,31 @@ enum COMMANDS {
 
 inline COMMANDS CheckCommand(String ^ inString)
 {
-    if (inString == "LOADSAVESTATE")
+    if (inString == RTCV::NetCore::Commands::Basic::LoadSavestate)
         return LOADSAVESTATE;
-    if (inString == "SAVESAVESTATE")
+    else if (inString == RTCV::NetCore::Commands::Basic::SaveSavestate)
         return SAVESAVESTATE;
-    if (inString == "REMOTE_LOADROM")
+    else if (inString == RTCV::NetCore::Commands::Remote::LoadROM)
         return REMOTE_LOADROM;
-    if (inString == "REMOTE_CLOSEGAME")
+    else if (inString == RTCV::NetCore::Commands::Remote::CloseGame)
         return REMOTE_CLOSEGAME;
-    if (inString == "REMOTE_ALLSPECSSENT")
+    else if (inString == RTCV::NetCore::Commands::Remote::AllSpecSent)
         return REMOTE_ALLSPECSSENT;
-    if (inString == "REMOTE_DOMAIN_GETDOMAINS")
+    else if (inString == RTCV::NetCore::Commands::Remote::DomainGetDomains)
         return REMOTE_DOMAIN_GETDOMAINS;
-    if (inString == "REMOTE_KEY_SETSYSTEMCORE")
+    else if (inString == RTCV::NetCore::Commands::Remote::KeySetSystemCore)
         return REMOTE_KEY_SETSYSTEMCORE;
-    if (inString == "REMOTE_KEY_SETSYNCSETTINGS")
+    else if (inString == RTCV::NetCore::Commands::Remote::KeySetSyncSettings)
         return REMOTE_KEY_SETSYNCSETTINGS;
-    if (inString == "REMOTE_EVENT_EMU_MAINFORM_CLOSE")
+    else if (inString == RTCV::NetCore::Commands::Remote::EventEmuMainFormClose)
         return REMOTE_EVENT_EMU_MAINFORM_CLOSE;
-    if (inString == "REMOTE_EVENT_EMUSTARTED")
+    else if (inString == RTCV::NetCore::Commands::Remote::EventEmuStarted)
         return REMOTE_EVENT_EMUSTARTED;
-    if (inString == "REMOTE_ISNORMALADVANCE")
+    else if (inString == RTCV::NetCore::Commands::Remote::IsNormalAdvance)
         return REMOTE_ISNORMALADVANCE;
-    if (inString == "REMOTE_EVENT_CLOSEEMULATOR")
+    else if (inString == RTCV::NetCore::Commands::Remote::EventCloseEmulator)
         return REMOTE_EVENT_CLOSEEMULATOR;
-    if (inString == "REMOTE_ALLSPECSSENT")
-        return REMOTE_ALLSPECSSENT;
-    if (inString == "REMOTE_RESUMEEMULATION")
+    else if (inString == RTCV::NetCore::Commands::Remote::ResumeEmulation)
         return REMOTE_RESUMEEMULATION;
     return UNKNOWN;
 }
@@ -495,7 +498,7 @@ void VanguardClient::LoadRom(String ^ filename)
 
 bool VanguardClient::LoadState(std::string filename)
 {
-    StepActions::ClearStepBlastUnits();
+    LocalNetCoreRouter::Route(Endpoints::CorruptCore, Commands::Remote::ClearStepBlastUnits, false);
     RtcClock::ResetCount();
     wxString mystring(filename);
     stateLoading = true;
